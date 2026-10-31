@@ -1,0 +1,6 @@
+[build]
+  command = "node scripts/prepare-site.mjs"
+  publish = "public"
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
