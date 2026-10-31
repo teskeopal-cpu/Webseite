@@ -121,6 +121,10 @@
             50% { border-color: #6366f1 }
         }
 
+        #pattern-grid { touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair; }
+        #pattern-lines { overflow: visible; color: #6366f1; }
+        #pattern-grid.pattern-error #pattern-lines { color: #f43f5e; }
+
         /* Glows and Dots */
         .dot-active {
             background-color: #6366f1 !important;
@@ -527,20 +531,23 @@
         <div id="pattern-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 fade-in">
             <div class="bg-[#12141c] border border-slate-800 p-6 rounded-3xl w-full max-w-xs text-center space-y-4 shadow-2xl">
                 <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Schritt 1: Entsperrmuster</h3>
-                <p class="text-[11px] text-slate-400">Tippe das 3x3 Muster ein</p>
+                <p class="text-[11px] text-slate-400">Verbinde die Punkte in einer durchgehenden Bewegung</p>
 
-                <div class="grid grid-cols-3 gap-5 w-48 h-48 mx-auto p-4 bg-slate-950 rounded-2xl border border-slate-800/80 flex items-center justify-center">
-                    <button type="button" onclick="pressPatternDot(1)" id="dot-1" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
-                    <button type="button" onclick="pressPatternDot(2)" id="dot-2" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
-                    <button type="button" onclick="pressPatternDot(3)" id="dot-3" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
-                    <button type="button" onclick="pressPatternDot(4)" id="dot-4" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
-                    <button type="button" onclick="pressPatternDot(5)" id="dot-5" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
-                    <button type="button" onclick="pressPatternDot(6)" id="dot-6" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
-                    <button type="button" onclick="pressPatternDot(7)" id="dot-7" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
-                    <button type="button" onclick="pressPatternDot(8)" id="dot-8" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
-                    <button type="button" onclick="pressPatternDot(9)" id="dot-9" class="pattern-node w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200 active:scale-125 focus:outline-none"></button>
+                <div id="pattern-grid" aria-label="Entsperrmuster zeichnen" class="relative grid grid-cols-3 gap-5 w-48 h-48 mx-auto p-4 bg-slate-950 rounded-2xl border border-slate-800/80 items-center">
+                    <svg id="pattern-lines" aria-hidden="true" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
+                    <span aria-hidden="true" id="dot-1" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
+                    <span aria-hidden="true" id="dot-2" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
+                    <span aria-hidden="true" id="dot-3" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
+                    <span aria-hidden="true" id="dot-4" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
+                    <span aria-hidden="true" id="dot-5" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
+                    <span aria-hidden="true" id="dot-6" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
+                    <span aria-hidden="true" id="dot-7" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
+                    <span aria-hidden="true" id="dot-8" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
+                    <span aria-hidden="true" id="dot-9" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
                 </div>
 
+                <button id="passkey-login" type="button" onclick="loginWithPasskey()" class="hidden w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs disabled:opacity-50">Mit Passkey fortfahren</button>
+                <p id="passkey-login-status" role="status" class="text-xs text-slate-400"></p>
                 <div class="flex gap-2">
                     <button type="button" onclick="resetPatternInput()" class="w-1/2 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold py-2 rounded-xl text-xs transition">Reset</button>
                     <button type="button" onclick="closePatternModal()" class="w-1/2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold py-2 rounded-xl text-xs transition">Abbrechen</button>
@@ -632,6 +639,18 @@
             Coding Quiz • Clean Presentation View
         </div>
     </div>
+
+    <div id="passkey-offer-modal" role="dialog" aria-modal="true" aria-labelledby="passkey-offer-title" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-[#12141c] border border-slate-800 p-6 rounded-3xl w-full max-w-xs text-center space-y-4 shadow-2xl">
+            <h3 id="passkey-offer-title" class="text-sm font-bold text-slate-200">Muster durch Passkey ersetzen?</h3>
+            <p class="text-xs text-slate-400">Verwende beim nächsten Mal einen Passkey statt des Musters – zum Beispiel mit Face ID, Touch ID oder Geräte-PIN. Der Host-Zugangscode bleibt erforderlich.</p>
+            <p id="passkey-offer-status" role="status" class="text-xs text-slate-400"></p>
+            <button id="passkey-create" type="button" disabled onclick="createQuizPasskey()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs disabled:opacity-50">Passkey einrichten</button>
+            <button id="passkey-skip" type="button" onclick="skipQuizPasskey()" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold py-3 rounded-xl text-xs disabled:opacity-50">Überspringen und Code eingeben</button>
+        </div>
+    </div>
+    <script src="/assets/vendor/simplewebauthn-browser.js"></script>
+    <script src="/assets/passkeys.js"></script>
 
     <!-- Firebase Logic Script -->
     <script type="module">
@@ -1069,7 +1088,7 @@
         let playerChoiceQuestionKey = '';
 
         let currentPattern = "";
-        const targetPattern = "145789"; 
+        const targetPattern = "147895"; 
         let playerSortQuestionKey = '';
         let beamerSortQuestionKey = '';
         let beamerSortItems = [];
@@ -1080,6 +1099,7 @@
         };
 
         window.closePatternModal = function() {
+            resetPatternInput();
             document.getElementById('pattern-modal').classList.add('hidden');
         };
 
@@ -1087,37 +1107,121 @@
             document.getElementById('host-access-modal').classList.add('hidden');
         };
 
+        const patternGrid = document.getElementById('pattern-grid');
+        const patternLines = document.getElementById('pattern-lines');
+        let patternPointer = null;
+        let patternLastPoint = null;
+        let patternTimer = null;
+
+        function patternCenters() {
+            const rect = patternGrid.getBoundingClientRect();
+            return Array.from({ length: 9 }, (_, i) => {
+                const dot = document.getElementById(`dot-${i + 1}`).getBoundingClientRect();
+                return { num: i + 1, x: dot.left + dot.width / 2 - rect.left,
+                    y: dot.top + dot.height / 2 - rect.top };
+            });
+        }
+
+        function drawPattern(tip = null) {
+            const centers = patternCenters();
+            const points = Array.from(currentPattern, num => centers[Number(num) - 1]);
+            if (tip && points.length) points.push(tip);
+            patternLines.replaceChildren();
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            line.setAttribute('points', points.map(p => `${p.x},${p.y}`).join(' '));
+            line.setAttribute('fill', 'none');
+            line.setAttribute('stroke', 'currentColor');
+            line.setAttribute('stroke-width', '4');
+            line.setAttribute('stroke-linecap', 'round');
+            line.setAttribute('stroke-linejoin', 'round');
+            patternLines.appendChild(line);
+        }
+
         window.resetPatternInput = function() {
-            currentPattern = "";
+            clearTimeout(patternTimer);
+            patternTimer = null;
+            const pointer = patternPointer;
+            patternPointer = null;
+            if (pointer !== null && patternGrid.hasPointerCapture(pointer)) {
+                patternGrid.releasePointerCapture(pointer);
+            }
+            patternLastPoint = null;
+            currentPattern = '';
+            patternLines.replaceChildren();
+            patternGrid.classList.remove('pattern-error');
             for (let i = 1; i <= 9; i++) {
-                const el = document.getElementById(`dot-${i}`);
-                if (el) el.classList.remove('dot-active', 'dot-error');
+                document.getElementById(`dot-${i}`).classList.remove('dot-active', 'dot-error');
             }
         };
 
-        window.pressPatternDot = function(num) {
-            if (currentPattern.includes(num.toString())) return;
-            currentPattern += num;
-            
-            const el = document.getElementById(`dot-${num}`);
-            if (el) el.classList.add('dot-active');
+        function tracePattern(event) {
+            const rect = patternGrid.getBoundingClientRect();
+            const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+            const start = patternLastPoint || point;
+            const dx = point.x - start.x;
+            const dy = point.y - start.y;
+            const lengthSquared = dx * dx + dy * dy;
+            // Test the entire movement segment so fast swipes still collect crossed dots.
+            const hits = patternCenters().map(dot => {
+                const t = lengthSquared ? Math.max(0, Math.min(1,
+                    ((dot.x - start.x) * dx + (dot.y - start.y) * dy) / lengthSquared)) : 0;
+                const distance = Math.hypot(dot.x - start.x - t * dx, dot.y - start.y - t * dy);
+                return { ...dot, t, distance };
+            }).filter(dot => dot.distance <= 18).sort((a, b) => a.t - b.t);
+            for (const dot of hits) {
+                if (currentPattern.includes(String(dot.num))) continue;
+                currentPattern += dot.num;
+                document.getElementById(`dot-${dot.num}`).classList.add('dot-active');
+            }
+            patternLastPoint = point;
+            drawPattern(point);
+        }
 
-            if (currentPattern === targetPattern) {
-                setTimeout(() => {
+        patternGrid.addEventListener('pointerdown', event => {
+            if (patternPointer !== null || patternTimer !== null || !event.isPrimary || event.button !== 0) return;
+            event.preventDefault();
+            resetPatternInput();
+            patternPointer = event.pointerId;
+            patternGrid.setPointerCapture(event.pointerId);
+            tracePattern(event);
+        });
+
+        patternGrid.addEventListener('pointermove', event => {
+            if (event.pointerId !== patternPointer) return;
+            event.preventDefault();
+            tracePattern(event);
+        });
+
+        patternGrid.addEventListener('pointerup', event => {
+            if (event.pointerId !== patternPointer) return;
+            tracePattern(event);
+            patternPointer = null;
+            if (patternGrid.hasPointerCapture(event.pointerId)) patternGrid.releasePointerCapture(event.pointerId);
+            drawPattern();
+            if (!currentPattern) {
+                resetPatternInput();
+            } else if (currentPattern === targetPattern) {
+                const matchedPattern = currentPattern;
+                patternTimer = setTimeout(() => {
                     closePatternModal();
-                    openHostAccessModal();
+                    offerQuizPasskey(matchedPattern);
                 }, 200);
-            } else if (currentPattern.length >= targetPattern.length) {
-                for (let i = 1; i <= 9; i++) {
-                    const dotEl = document.getElementById(`dot-${i}`);
-                    if (dotEl && dotEl.classList.contains('dot-active')) {
-                        dotEl.classList.remove('dot-active');
-                        dotEl.classList.add('dot-error');
-                    }
+            } else {
+                patternGrid.classList.add('pattern-error');
+                for (const num of currentPattern) {
+                    const dot = document.getElementById(`dot-${num}`);
+                    dot.classList.remove('dot-active');
+                    dot.classList.add('dot-error');
                 }
-                setTimeout(() => resetPatternInput(), 500);
+                patternTimer = setTimeout(resetPatternInput, 500);
             }
-        };
+        });
+
+        for (const name of ['pointercancel', 'lostpointercapture']) {
+            patternGrid.addEventListener(name, event => {
+                if (event.pointerId === patternPointer) resetPatternInput();
+            });
+        }
 
         window.openHostAccessModal = function() {
             const input = document.getElementById('host-access-code');
