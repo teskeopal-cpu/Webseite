@@ -138,32 +138,6 @@
             box-shadow: 0 0 25px rgba(244, 63, 94, 0.8) !important;
         }
 
-        #host-qr-frame {
-            position: relative;
-            display: inline-flex;
-        }
-        .qr-dust-particle {
-            position: absolute;
-            z-index: 2;
-            width: 4px;
-            height: 4px;
-            background: #090a0f;
-            border-radius: 1px;
-            pointer-events: none;
-            animation: qrDust 900ms ease-out var(--dust-delay) forwards;
-        }
-        @keyframes qrDust {
-            to {
-                opacity: 0;
-                transform: translate(var(--dust-x), var(--dust-y)) rotate(var(--dust-rotate)) scale(0.25);
-            }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .qr-dust-particle {
-                animation-duration: 1ms;
-            }
-        }
-
         .screen-transition {
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -395,14 +369,13 @@
                     <span class="text-[10px] uppercase font-bold text-slate-500 block mb-0.5">Status</span>
                     <span id="host-game-status" class="text-xs font-bold text-emerald-400">Wartet auf Start</span>
                 </div>
+                <button id="toggle-beamer-join-info" type="button" onclick="toggleBeamerJoinInfo()" aria-pressed="true" class="col-span-2 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 text-[11px] font-bold rounded-2xl px-3 py-3 transition">
+                    QR-Code auf Tafel zeigen
+                </button>
             </div>
 
-            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col items-center gap-2 text-center">
-                <h3 class="text-xs font-bold text-slate-200">Website per QR-Code öffnen</h3>
-                <div id="host-qr-frame">
-                    <div id="host-qr-code" class="bg-white p-2 rounded-xl" aria-label="QR-Code zur Website"></div>
-                </div>
-                <p id="host-qr-status" class="text-[10px] text-slate-400" aria-live="polite">Scanne den Code mit deinem Handy, um die Website zu öffnen.</p>
+            <div id="host-join-info-status" class="text-center text-[10px] text-slate-500" aria-live="polite">
+                QR-Code und Raumcode sind auf der Tafel ausgeblendet.
             </div>
 
             <!-- TIMER-AUSWAHL -->
@@ -469,6 +442,7 @@
 
             <div id="player-question-container" class="space-y-6">
                 <div class="liquid-glass p-6 rounded-[2rem] border border-slate-800 text-center shadow-2xl space-y-4">
+                    <span id="player-timer-badge" class="inline-flex px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold rounded-full font-mono">Zeit: --s</span>
                     <p id="player-question-text" class="text-base font-semibold text-slate-100 leading-relaxed">Warte auf die Frage vom Host...</p>
                 </div>
 
@@ -546,8 +520,6 @@
                     <span aria-hidden="true" id="dot-9" class="pattern-node relative w-6 h-6 mx-auto bg-slate-800 rounded-full transition-all duration-200"></span>
                 </div>
 
-                <button id="passkey-login" type="button" onclick="loginWithPasskey()" class="hidden w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs disabled:opacity-50">Mit Passkey fortfahren</button>
-                <p id="passkey-login-status" role="status" class="text-xs text-slate-400"></p>
                 <div class="flex gap-2">
                     <button type="button" onclick="resetPatternInput()" class="w-1/2 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold py-2 rounded-xl text-xs transition">Reset</button>
                     <button type="button" onclick="closePatternModal()" class="w-1/2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold py-2 rounded-xl text-xs transition">Abbrechen</button>
@@ -594,9 +566,16 @@
                 <h2 class="text-xs font-extrabold text-slate-300 uppercase tracking-widest">Digitaler Tafel-Modus</h2>
             </div>
             <div class="flex items-center gap-4">
-                <span class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl text-xs font-mono text-indigo-400 font-bold">Raum: <span id="beamer-display-code">----</span></span>
                 <button onclick="location.reload()" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs px-4 py-2 rounded-xl font-semibold transition">Tafel schließen ✖</button>
             </div>
+        </div>
+
+        <div id="beamer-join-info" class="hidden absolute top-24 right-8 z-20 w-64 p-4 rounded-2xl border border-indigo-400/30 bg-slate-950/95 shadow-2xl text-center">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-300">Zum Mitspielen scannen</p>
+            <div id="beamer-qr-code" class="inline-flex bg-white p-2 rounded-xl my-3" aria-label="QR-Code zur Website"></div>
+            <p id="beamer-qr-status" class="text-[10px] text-slate-400 mb-3"></p>
+            <p class="text-[10px] uppercase tracking-wider text-slate-500">Raumcode</p>
+            <p id="beamer-display-code" class="text-3xl font-black font-mono tracking-[0.3em] text-indigo-300">----</p>
         </div>
 
         <div class="max-w-4xl mx-auto w-full space-y-6 text-center my-auto">
@@ -624,13 +603,16 @@
                 <span class="px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold rounded-full uppercase tracking-wider">🏆 Aktuelles Ranking</span>
                 <h1 class="text-3xl font-extrabold text-slate-100">Top Spieler</h1>
                 <div id="beamer-top-ranking" class="space-y-3 max-w-md mx-auto pt-2"></div>
-                <div class="max-w-2xl mx-auto p-5 rounded-2xl border border-emerald-500/30 bg-emerald-950/40 text-left">
-                    <p class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">Richtige Antwort</p>
+                <div class="max-w-3xl mx-auto p-4 md:p-5 rounded-2xl border border-emerald-500/30 bg-emerald-950/30 text-left">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-3">Richtige Antwort</p>
                     <div id="beamer-correct-answer" class="text-base font-semibold text-slate-100"></div>
                 </div>
-                <div class="max-w-2xl mx-auto p-5 rounded-2xl border border-indigo-500/30 bg-indigo-950/30 text-left">
-                    <p class="text-xs font-bold uppercase tracking-wider text-indigo-300 mb-2">Antwort-Auswertung</p>
-                    <div id="beamer-answer-stats" class="space-y-2 text-sm text-slate-200"></div>
+                <div class="max-w-3xl mx-auto p-4 md:p-5 rounded-2xl border border-slate-700/80 bg-slate-900/70 text-left">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-indigo-300">Antwort-Auswertung</p>
+                        <p id="beamer-answer-summary" class="text-xs font-semibold text-slate-300"></p>
+                    </div>
+                    <div id="beamer-answer-stats" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-slate-200"></div>
                 </div>
             </div>
         </div>
@@ -640,17 +622,87 @@
         </div>
     </div>
 
-    <div id="passkey-offer-modal" role="dialog" aria-modal="true" aria-labelledby="passkey-offer-title" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-        <div class="bg-[#12141c] border border-slate-800 p-6 rounded-3xl w-full max-w-xs text-center space-y-4 shadow-2xl">
-            <h3 id="passkey-offer-title" class="text-sm font-bold text-slate-200">Muster durch Passkey ersetzen?</h3>
-            <p class="text-xs text-slate-400">Verwende beim nächsten Mal einen Passkey statt des Musters – zum Beispiel mit Face ID, Touch ID oder Geräte-PIN. Der Host-Zugangscode bleibt erforderlich.</p>
-            <p id="passkey-offer-status" role="status" class="text-xs text-slate-400"></p>
-            <button id="passkey-create" type="button" disabled onclick="createQuizPasskey()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs disabled:opacity-50">Passkey einrichten</button>
-            <button id="passkey-skip" type="button" onclick="skipQuizPasskey()" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold py-3 rounded-xl text-xs disabled:opacity-50">Überspringen und Code eingeben</button>
-        </div>
-    </div>
-    <script src="/assets/vendor/simplewebauthn-browser.js"></script>
-    <script src="/assets/passkeys.js"></script>
+    <script type="application/json" id="embedded-question-bank">
+    [
+      {
+        "id": "a6d46090-2939-4da8-9d82-6bbaf3b0f3b2",
+        "type": "choice",
+        "question": "Ist ein Studienabschluss notwendig, um App-Entwickler*in zu werden?",
+        "options": [
+          "Ja",
+          "Nein",
+          "",
+          ""
+        ],
+        "correct": [
+          1
+        ],
+        "points": [
+          0,
+          1,
+          0,
+          0
+        ],
+        "moderation": "Verschiedene Möglichkeiten"
+      },
+      {
+        "id": "728f3804-74bc-4df4-b398-7bc6442f1763",
+        "type": "choice",
+        "question": "Welche Möglichkeiten gibt es, um App-Entwickler*inn zu werden?",
+        "options": [
+          "Informatikstudium",
+          "Selbstudium  (z.B Onlinekurse, Tutorials)",
+          "Ausbildung als Diplom-Informatikassistent*in für Softwarearchitektur",
+          "Ausbildung als Fachinformatiker*in"
+        ],
+        "correct": [
+          0,
+          1,
+          3
+        ],
+        "points": [
+          1,
+          1,
+          -1,
+          1
+        ],
+        "moderation": "Nicht jede professionell klingende Berufsausbildung existiert tatsächlich"
+      },
+      {
+        "id": "a9cb07c7-8d7e-4129-8730-7a1383fa23ca",
+        "type": "estimate",
+        "question": "Wie lange dauert es, um als Appentwickler*in gute Anwendungen entwickeln zu können?",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "correct": 4,
+        "tolerance": 1,
+        "moderation": "3-5 Jahre"
+      },
+      {
+        "id": "45187d08-500f-4c48-9664-dfa162aa5d80",
+        "type": "choice",
+        "question": "Ist Softwareentwickler*in und App-Entwickler*in der gleiche Beruf?",
+        "options": [
+          "Ja",
+          "Nein",
+          "Jede/r  Softwareentwickler*in  ist auch  App-Entwickler*in",
+          "Jede/r  App-Entwickler*in  ist auch  Softwareentwickler*in"
+        ],
+        "correct": [
+          1,
+          3
+        ],
+        "points": [
+          -1,
+          1,
+          -1,
+          1
+        ],
+        "moderation": "Sofwareentwickler*in ist Überbegriff\nApp-Entwickler*in ist ein/e spezialisierte/r Softwareentwickler*in"
+      }
+    ]
+    </script>
 
     <!-- Firebase Logic Script -->
     <script type="module">
@@ -718,7 +770,7 @@
 
         // REST OF THE EXISTING SCRIPT STARTING FROM Firebase...
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update, remove, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCQvtcWsPmvaLBOzYSsknFCv8SDdJ5IorE",
@@ -732,15 +784,30 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        window.showAppToast = function(message) {
+            let toast = document.getElementById('app-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'app-toast';
+                toast.className = 'app-toast';
+                toast.setAttribute('role', 'status');
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast.hideTimer);
+            toast.hideTimer = window.setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
         const HOST_ACCESS_CODE = '280512';
 
         function isLocalDevelopmentHost() {
             return ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
         }
 
-        function renderHostQRCode() {
-            const container = document.getElementById('host-qr-code');
-            const status = document.getElementById('host-qr-status');
+        function renderJoinQRCode(containerId, statusId, size = 160) {
+            const container = document.getElementById(containerId);
+            const status = document.getElementById(statusId);
             container.replaceChildren();
 
             if (typeof QRCode === 'undefined') {
@@ -750,26 +817,22 @@
 
             new QRCode(container, {
                 text: location.origin + location.pathname,
-                width: 160,
-                height: 160,
+                width: size,
+                height: size,
                 colorDark: '#090a0f',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M
             });
 
             status.innerText = isLocalDevelopmentHost()
-                ? 'Lokal gehostet: Das Handy muss im selben Netzwerk sein und die lokale Adresse erreichen können.'
-                : 'Scanne den Code mit deinem Handy, um die Website zu öffnen.';
+                ? 'Lokal: Handy und Computer müssen im selben Netzwerk sein.'
+                : 'QR-Code öffnet die Website.';
         }
 
-        const defaultCareerQuestions = [
-            { question: "Wie viele mobile Apps werden schätzungsweise weltweit jede Sekunde heruntergeladen?", options: ["Etwa 1.000 Downloads", "Mehr als 30.000 Downloads", "Exakt 50 Downloads", "Ungefähr 5 Millionen"], correct: 1, moderation: "Hinweis: Allein im App Store & Google Play Store sind das über 250 Milliarden Downloads pro Jahr!" },
-            { question: "Was ist der allererste Schritt bei der professionellen Entwicklung einer neuen App?", options: ["Direkt den Programmcode schreiben", "UI/UX Wireframing und Konzept", "Hardware für 10.000€ kaufen", "Plakate drucken"], correct: 1, moderation: "Erklärung: Erst skizziert man das User Interface (UI) und die User Experience (UX), um das Problem zu verstehen." },
-            { question: "Seit ungefähr wie vielen Jahren gibt es moderne Smartphones mit Touchscreen?", options: ["Erst seit ca. 15 bis 20 Jahren", "Seit über 100 Jahren", "Seit dem Mittelalter", "Genau 5 Jahre"], correct: 0, moderation: "Fakt: Das erste moderne iPhone kam 2007 auf den Markt." },
-            { question: "Was versteht man in der Software-Architektur unter dem Begriff 'Cross-Platform'?", options: ["App läuft auf iOS und Android gleichzeitig", "Software läuft nur auf einem alten PC", "Ein WLAN-Fehler", "Ein Ladekabel"], correct: 0, moderation: "Hintergrund: Frameworks wie Flutter oder React Native nutzen einen gemeinsamen Code für beide Welten." }
-        ];
+        const embeddedQuestionBank = JSON.parse(document.getElementById('embedded-question-bank').textContent);
+        const defaultCareerQuestions = embeddedQuestionBank.map(question => normalizeQuestion(question)).filter(Boolean);
 
-        const QUESTION_BANK_STORAGE_KEY = 'app-dev-quiz-question-bank-v1';
+        const QUESTION_BANK_VERSION = 2;
         let careerQuestions = [];
         let questionBankReady = null;
         let editingQuestionId = null;
@@ -819,66 +882,111 @@
             return normalized.question ? normalized : null;
         }
 
-        function readLocalQuestionBank() {
-            try {
-                const saved = JSON.parse(localStorage.getItem(QUESTION_BANK_STORAGE_KEY) || 'null');
-                return saved && Array.isArray(saved.questions) ? saved : null;
-            } catch {
-                return null;
-            }
+        function normalizeQuestionBank(bank) {
+            const sourceQuestions = Array.isArray(bank) ? bank : bank?.questions;
+            if (!Array.isArray(sourceQuestions)) return null;
+            const questions = sourceQuestions.map(normalizeQuestion);
+            if (questions.some(question => !question)) return null;
+            return {
+                updatedAt: Number(bank?.updatedAt) || Date.now(),
+                questionBankVersion: Number(bank?.questionBankVersion) || 0,
+                questionCount: questions.length,
+                questions
+            };
         }
 
-        async function persistQuestionBank(syncRemote = true) {
-            const payload = { updatedAt: Date.now(), questionCount: careerQuestions.length, questions: careerQuestions };
-            try {
-                localStorage.setItem(QUESTION_BANK_STORAGE_KEY, JSON.stringify(payload));
-            } catch (error) {
-                console.warn('Lokaler Fragenkatalog konnte nicht gespeichert werden:', error);
-            }
-            if (!syncRemote) return false;
-            try {
-                await set(ref(db, 'questionBank'), payload);
-                return true;
-            } catch (error) {
-                console.warn('Fragenkatalog nur lokal gespeichert:', error);
-                return false;
-            }
+        async function persistQuestionBank(transformQuestions) {
+            let transformRejected = false;
+            const result = await runTransaction(ref(db, 'questionBank'), currentBank => {
+                const bank = normalizeQuestionBank(currentBank);
+                if (!bank) return;
+                const questions = transformQuestions(bank.questions);
+                if (!Array.isArray(questions)) {
+                    transformRejected = true;
+                    return;
+                }
+                return {
+                    updatedAt: Date.now(),
+                    questionBankVersion: QUESTION_BANK_VERSION,
+                    questionCount: questions.length,
+                    questions
+                };
+            }, { applyLocally: false });
+
+            if (!result.committed || transformRejected) return false;
+            const payload = normalizeQuestionBank(result.snapshot.val());
+            if (!payload) throw new Error('Der gespeicherte Fragenkatalog hat ein ungültiges Format.');
+            careerQuestions = payload.questions;
+            return true;
         }
 
         async function loadQuestionBank() {
-            const localBank = readLocalQuestionBank();
-            let remoteBank = null;
-            let remoteReadSucceeded = false;
-            try {
-                const snapshot = await Promise.race([
-                    get(ref(db, 'questionBank')),
-                    new Promise(resolve => setTimeout(() => resolve(null), 5000))
-                ]);
-                if (snapshot) {
-                    remoteReadSucceeded = true;
-                    if (snapshot.exists()) remoteBank = snapshot.val();
-                }
-            } catch (error) {
-                console.warn('Firebase-Fragenkatalog nicht erreichbar:', error);
-            }
-
-            const remoteHasBank = remoteBank && (Array.isArray(remoteBank.questions) || remoteBank.questionCount === 0);
-            let source = remoteHasBank
-                ? remoteBank
-                : localBank;
-            if (localBank && (!remoteBank || Number(localBank.updatedAt) > Number(remoteBank.updatedAt))) source = localBank;
-            const questions = source && Array.isArray(source.questions) ? source.questions.map(normalizeQuestion).filter(Boolean) : [];
-            careerQuestions = source ? questions : defaultCareerQuestions.map(normalizeQuestion).filter(Boolean);
-
-            if (!remoteHasBank && !localBank) await persistQuestionBank(remoteReadSucceeded);
-            else if (remoteReadSucceeded && source === localBank) await persistQuestionBank();
-            else if (source === localBank && remoteBank) await persistQuestionBank();
             const status = document.getElementById('question-editor-status');
-            if (status && remoteBank) status.innerText = 'Fragenkatalog synchronisiert.';
-            else if (status && localBank) status.innerText = 'Lokaler Fragenkatalog geladen; Firebase-Synchronisierung nicht verfügbar.';
+            try {
+                const snapshot = await get(ref(db, 'questionBank'));
+                let bank = normalizeQuestionBank(snapshot.val());
+                if (!bank) {
+                    if (snapshot.exists()) {
+                        throw new Error('Der gemeinsame Fragenkatalog hat ein ungültiges Format.');
+                    }
+                    const seed = {
+                        updatedAt: Date.now(),
+                        questionBankVersion: QUESTION_BANK_VERSION,
+                        questionCount: defaultCareerQuestions.length,
+                        questions: defaultCareerQuestions
+                    };
+                    const result = await runTransaction(ref(db, 'questionBank'), currentBank => {
+                        if (currentBank !== null) return;
+                        return seed;
+                    }, { applyLocally: false });
+                    bank = normalizeQuestionBank(result.snapshot.val());
+                    if (!bank) throw new Error('Der gemeinsame Fragenkatalog konnte nicht initialisiert werden.');
+                } else if (bank.questionBankVersion < QUESTION_BANK_VERSION) {
+                    const migrated = await runTransaction(ref(db, 'questionBank'), currentBank => {
+                        const current = normalizeQuestionBank(currentBank);
+                        if (!current || current.questionBankVersion >= QUESTION_BANK_VERSION) return;
+                        return {
+                            updatedAt: Date.now(),
+                            questionBankVersion: QUESTION_BANK_VERSION,
+                            questionCount: defaultCareerQuestions.length,
+                            questions: defaultCareerQuestions
+                        };
+                    }, { applyLocally: false });
+                    bank = normalizeQuestionBank(migrated.snapshot.val());
+                    if (!bank || bank.questionBankVersion < QUESTION_BANK_VERSION) {
+                        throw new Error('Der gemeinsame Fragenkatalog konnte nicht auf die Fragen aus der HTML-Datei umgestellt werden.');
+                    }
+                }
+                careerQuestions = bank.questions;
+                if (status) status.innerText = 'Fragenkatalog auf allen Geräten synchronisiert.';
+            } catch (error) {
+                console.error('Gemeinsamer Fragenkatalog konnte nicht geladen werden:', error);
+                careerQuestions = defaultCareerQuestions;
+                if (status) status.innerText = 'Gemeinsamer Fragenkatalog nicht erreichbar. Eingebetteter Fragenstand wird nur lesend verwendet; Änderungen können nicht synchronisiert werden.';
+            }
         }
 
         questionBankReady = loadQuestionBank();
+        questionBankReady.then(() => {
+            onValue(ref(db, 'questionBank'), snapshot => {
+                if (!snapshot.exists()) return;
+                const bank = normalizeQuestionBank(snapshot.val());
+                if (!bank || bank.questionBankVersion < QUESTION_BANK_VERSION) {
+                    console.error('Veralteter oder ungültiger gemeinsamer Fragenkatalog wurde ignoriert.');
+                    return;
+                }
+                careerQuestions = bank.questions;
+                const editor = document.getElementById('question-editor-screen');
+                if (editor && !editor.classList.contains('hidden')) {
+                    renderQuestionEditor();
+                    document.getElementById('question-editor-status').innerText = 'Fragenkatalog auf einem anderen Gerät aktualisiert.';
+                }
+            }, error => {
+                console.error('Live-Synchronisierung des Fragenkatalogs fehlgeschlagen:', error);
+                const status = document.getElementById('question-editor-status');
+                if (status) status.innerText = 'Live-Synchronisierung fehlgeschlagen. Änderungen werden beim nächsten Laden erneut abgerufen.';
+            });
+        });
 
         function questionTypeLabel(type) {
             return { choice: 'Multiple Choice', estimate: 'Schätzfrage', sort: 'Sortierfrage' }[type] || 'Multiple Choice';
@@ -1012,11 +1120,22 @@
         };
 
         window.deleteEditorQuestion = async function(questionId) {
-            careerQuestions = careerQuestions.filter(question => question.id !== questionId);
-            editingQuestionId = editingQuestionId === questionId ? null : editingQuestionId;
-            renderQuestionEditor();
-            const remoteSaved = await persistQuestionBank();
-            document.getElementById('question-editor-status').innerText = remoteSaved ? 'Frage gelöscht und dauerhaft synchronisiert.' : 'Frage lokal gelöscht; Firebase-Speicherung nicht verfügbar.';
+            try {
+                const saved = await persistQuestionBank(questions => {
+                    if (!questions.some(question => question.id === questionId)) return null;
+                    return questions.filter(question => question.id !== questionId);
+                });
+                if (!saved) {
+                    document.getElementById('question-editor-status').innerText = 'Die Frage wurde nicht gefunden oder konnte nicht gespeichert werden.';
+                    return;
+                }
+                editingQuestionId = editingQuestionId === questionId ? null : editingQuestionId;
+                renderQuestionEditor();
+                document.getElementById('question-editor-status').innerText = 'Frage auf allen Geräten gelöscht.';
+            } catch (error) {
+                console.error('Frage konnte nicht gemeinsam gelöscht werden:', error);
+                document.getElementById('question-editor-status').innerText = 'Löschen fehlgeschlagen. Die Frage wurde nicht verändert; bitte Internetverbindung und Datenbankzugriff prüfen.';
+            }
         };
 
         window.saveEditorQuestion = async function(event) {
@@ -1068,24 +1187,70 @@
                 document.getElementById('question-editor-status').innerText = 'Die Frage ist unvollständig oder ungültig.';
                 return;
             }
-            const existingIndex = careerQuestions.findIndex(item => item.id === editingQuestionId);
-            if (existingIndex >= 0) careerQuestions[existingIndex] = normalized;
-            else careerQuestions.push(normalized);
-
-            renderQuestionEditor();
-            const remoteSaved = await persistQuestionBank();
-            newEditorQuestion();
-            document.getElementById('question-editor-status').innerText = remoteSaved
-                ? 'Frage gespeichert und für zukünftige Spiele synchronisiert.'
-                : 'Frage lokal gespeichert. Firebase ist nicht erreichbar; auf anderen Geräten wird sie nicht synchronisiert.';
+            try {
+                const saved = await persistQuestionBank(questions => {
+                    if (editingQuestionId) {
+                        const existingIndex = questions.findIndex(item => item.id === editingQuestionId);
+                        if (existingIndex < 0) return null;
+                        questions[existingIndex] = normalized;
+                        return questions;
+                    }
+                    return [...questions, normalized];
+                });
+                if (!saved) {
+                    document.getElementById('question-editor-status').innerText = 'Die Frage wurde nicht gefunden oder konnte nicht gespeichert werden.';
+                    return;
+                }
+                renderQuestionEditor();
+                newEditorQuestion();
+                document.getElementById('question-editor-status').innerText = 'Frage auf allen Geräten gespeichert.';
+            } catch (error) {
+                console.error('Frage konnte nicht gemeinsam gespeichert werden:', error);
+                document.getElementById('question-editor-status').innerText = 'Speichern fehlgeschlagen. Die Frage wurde nicht verändert; bitte Internetverbindung und Datenbankzugriff prüfen.';
+            }
         };
 
         let currentRoom = null;
         let currentPlayerId = null;
         let currentQuestionIndex = -1;
+        let beamerJoinInfoVisible = true;
+        let beamerJoinInfoAvailable = true;
         let hasAnsweredCurrentQuestion = false;
         let selectedChoiceAnswers = new Set();
         let playerChoiceQuestionKey = '';
+
+        function updateBeamerJoinInfoControl(visible) {
+            beamerJoinInfoVisible = visible;
+            const button = document.getElementById('toggle-beamer-join-info');
+            if (!button) return;
+            button.setAttribute('aria-pressed', String(visible));
+            button.disabled = !beamerJoinInfoAvailable;
+            button.innerText = !beamerJoinInfoAvailable
+                ? 'QR-Code nur am Anfang verfügbar'
+                : visible ? 'QR-Code auf Tafel ausblenden' : 'QR-Code auf Tafel zeigen';
+            document.getElementById('host-join-info-status').innerText = !beamerJoinInfoAvailable
+                ? 'Der QR-Code wird nach dem Start der ersten Frage ausgeblendet.'
+                : visible
+                    ? 'QR-Code und Raumcode werden auf der Tafel angezeigt.'
+                    : 'QR-Code und Raumcode sind auf der Tafel ausgeblendet.';
+        }
+
+        function setBeamerJoinInfoAvailable(available) {
+            beamerJoinInfoAvailable = available;
+            updateBeamerJoinInfoControl(beamerJoinInfoVisible);
+        }
+
+        window.toggleBeamerJoinInfo = async function() {
+            if (!currentRoom || !beamerJoinInfoAvailable) return;
+            const nextVisibility = !beamerJoinInfoVisible;
+            try {
+                await update(ref(db, `rooms/${currentRoom}`), { joinInfoVisible: nextVisibility });
+                updateBeamerJoinInfoControl(nextVisibility);
+            } catch (error) {
+                console.error('QR-Code-Anzeige auf der Tafel konnte nicht geändert werden:', error);
+                window.showAppToast('Anzeige auf der Tafel konnte nicht geändert werden.');
+            }
+        };
 
         let currentPattern = "";
         const targetPattern = "147895"; 
@@ -1201,10 +1366,9 @@
             if (!currentPattern) {
                 resetPatternInput();
             } else if (currentPattern === targetPattern) {
-                const matchedPattern = currentPattern;
                 patternTimer = setTimeout(() => {
                     closePatternModal();
-                    offerQuizPasskey(matchedPattern);
+                    window.openHostAccessModal();
                 }, 200);
             } else {
                 patternGrid.classList.add('pattern-error');
@@ -1252,7 +1416,7 @@
                 closeHostAccessModal();
                 document.getElementById('secret-host-btn').classList.remove('hidden');
                 document.getElementById('question-editor-open-btn').classList.remove('hidden');
-                showAppToast("Code bestätigt! Der Host-Modus ist freigeschaltet.");
+                window.showAppToast("Code bestätigt! Der Host-Modus ist freigeschaltet.");
                 return;
             }
             status.innerText = 'Code falsch. Bitte erneut eingeben.';
@@ -1283,6 +1447,7 @@
                 document.getElementById('app').classList.add('hidden');
                 document.getElementById('beamer-screen-container').classList.remove('hidden');
                 document.getElementById('beamer-display-code').innerText = code;
+                renderJoinQRCode('beamer-qr-code', 'beamer-qr-status', 144);
 
                 const roomRef = ref(db, 'rooms/' + code);
 
@@ -1296,6 +1461,10 @@
                     const qIdx = roomData.currentQuestion;
                     const isRevealed = roomData.isRevealed || false;
                     const players = roomData.players || {};
+                    document.getElementById('beamer-join-info').classList.toggle(
+                        'hidden',
+                        roomData.joinInfoVisible !== true || qIdx >= 0
+                    );
 
                     if (qIdx === -1) {
                         document.getElementById('beamer-waiting-view').classList.remove('hidden');
@@ -1436,17 +1605,20 @@
 
         function renderBeamerAnswerStats(question, players) {
             const container = document.getElementById('beamer-answer-stats');
+            const summary = document.getElementById('beamer-answer-summary');
             container.replaceChildren();
             if (!question || (question.type || 'choice') !== 'choice') {
-                container.textContent = 'Die Antwort-Auswertung nach Auswahl gibt es für Multiple-Choice-Fragen.';
+                summary.textContent = '';
+                container.className = 'text-sm text-slate-400';
+                container.textContent = 'Für diesen Fragetyp gibt es keine Antwort-Auswertung nach Auswahl.';
                 return;
             }
 
             const options = question.options || [];
             const correctAnswers = new Set((Array.isArray(question.correct) ? question.correct : [question.correct]).map(Number));
-            const points = Array.isArray(question.points) ? question.points : [100, 100, 100, 100];
             const counts = [0, 0, 0, 0];
             let answeredPlayers = 0;
+            const totalPlayers = Object.keys(players || {}).length;
 
             Object.values(players || {}).forEach(player => {
                 const answer = player.selectedAnswer;
@@ -1457,53 +1629,73 @@
                     .forEach(index => counts[index] += 1);
             });
 
-            const answeredSummary = document.createElement('p');
-            answeredSummary.className = 'text-xs text-slate-400 mb-3';
-            answeredSummary.textContent = `${answeredPlayers} von ${Object.keys(players || {}).length} Spielern haben geantwortet`;
-            container.appendChild(answeredSummary);
+            summary.textContent = `${answeredPlayers} / ${totalPlayers} haben geantwortet`;
+            container.className = 'grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-slate-200';
 
             options.forEach((option, index) => {
                 if (!option) return;
                 const isCorrect = correctAnswers.has(index);
-                const perSelection = isCorrect && Number.isFinite(Number(points[index])) ? Number(points[index]) : 0;
-                const totalPoints = perSelection * counts[index];
-                const row = document.createElement('div');
-                row.className = 'flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-slate-700/70 pt-2';
+                const percentage = answeredPlayers ? Math.round(counts[index] / answeredPlayers * 100) : 0;
+                const card = document.createElement('div');
+                card.className = 'min-w-0 rounded-xl bg-slate-950/70 border border-slate-800 px-3 py-2.5';
 
+                const header = document.createElement('div');
+                header.className = 'flex items-start justify-between gap-3 mb-2';
                 const answerLabel = document.createElement('span');
-                answerLabel.className = 'font-semibold';
-                answerLabel.textContent = `${String.fromCharCode(65 + index)}. ${option}${isCorrect ? ' ✓' : ''}`;
+                answerLabel.className = 'min-w-0 text-xs font-semibold leading-relaxed text-slate-200';
+                answerLabel.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
 
-                const answerStats = document.createElement('span');
-                answerStats.className = 'text-right text-slate-300';
-                const formatPoints = value => `${value > 0 ? '+' : ''}${value}`;
-                answerStats.textContent = `${counts[index]} Spieler · ${formatPoints(perSelection)} je Auswahl · insgesamt ${formatPoints(totalPoints)} Pkt`;
+                const countLabel = document.createElement('span');
+                countLabel.className = 'shrink-0 text-[11px] font-bold tabular-nums text-slate-300';
+                countLabel.textContent = `${counts[index]} · ${percentage}%`;
+                header.append(answerLabel, countLabel);
 
-                row.append(answerLabel, answerStats);
-                container.appendChild(row);
+                const track = document.createElement('div');
+                track.className = 'h-1.5 rounded-full bg-slate-800 overflow-hidden';
+                const bar = document.createElement('div');
+                bar.className = `h-full rounded-full transition-all ${isCorrect ? 'bg-emerald-400' : 'bg-indigo-400'}`;
+                bar.style.width = `${percentage}%`;
+                track.appendChild(bar);
+                card.append(header, track);
+
+                if (isCorrect) {
+                    const correctLabel = document.createElement('p');
+                    correctLabel.className = 'mt-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400';
+                    correctLabel.textContent = 'Richtige Antwort';
+                    card.appendChild(correctLabel);
+                }
+                container.appendChild(card);
             });
         }
 
         window.createRoom = async function() {
-            await questionBankReady;
-            if (!careerQuestions.length) {
-                alert('Füge zuerst mindestens eine gültige Frage hinzu.');
-                return;
-            }
-            const code = Math.floor(1000 + Math.random() * 9000).toString();
-            currentRoom = code;
+            const startButton = document.getElementById('secret-host-btn');
+            if (startButton.disabled) return;
+            startButton.disabled = true;
 
-            set(ref(db, 'rooms/' + code), {
-                status: 'waiting',
-                currentQuestion: -1,
-                isRevealed: false,
-                timeLeft: 0,
-                questions: careerQuestions
-            }).then(() => {
+            try {
+                await questionBankReady;
+                if (!careerQuestions.length) {
+                    alert('Füge zuerst mindestens eine gültige Frage hinzu.');
+                    return;
+                }
+                const code = Math.floor(1000 + Math.random() * 9000).toString();
+
+                await set(ref(db, 'rooms/' + code), {
+                    status: 'waiting',
+                    currentQuestion: -1,
+                    isRevealed: false,
+                    timeLeft: 0,
+                    joinInfoVisible: true,
+                    questions: careerQuestions
+                });
+                currentRoom = code;
+                setBeamerJoinInfoAvailable(true);
+                updateBeamerJoinInfoControl(true);
+
                 document.getElementById('home-screen').classList.add('hidden');
                 document.getElementById('host-screen').classList.remove('hidden');
                 document.getElementById('display-room-code').innerText = code;
-                renderHostQRCode();
 
                 onValue(ref(db, `rooms/${code}/players`), (snapshot) => {
                     const leaderboard = document.getElementById('player-leaderboard');
@@ -1511,7 +1703,6 @@
                     const players = snapshot.val();
                     if (!players || Object.keys(players).length === 0) return leaderboard.innerHTML = '<p class="text-slate-500 text-xs italic">Warte auf Teilnehmer...</p>';
 
-                    animateHostQRCodeDissolve();
                     checkAllPlayersAnswered(players);
 
                     const sorted = Object.entries(players);
@@ -1531,41 +1722,19 @@
                         leaderboard.appendChild(div);
                     });
                 });
-            });
-        };
-
-        function animateHostQRCodeDissolve() {
-            const frame = document.getElementById('host-qr-frame');
-            if (!frame || frame.dataset.animating === 'true') return;
-            frame.dataset.animating = 'true';
-
-            const frameWidth = frame.offsetWidth;
-            const frameHeight = frame.offsetHeight;
-            const particleCount = 24;
-            for (let index = 0; index < particleCount; index += 1) {
-                const side = index % 4;
-                const particle = document.createElement('span');
-                particle.className = 'qr-dust-particle';
-                if (side === 0 || side === 2) {
-                    particle.style.left = `${((index / 4) % 6) * frameWidth / 6}px`;
-                    particle.style.top = side === 0 ? '-6px' : `${frameHeight + 2}px`;
-                } else {
-                    particle.style.left = side === 1 ? `${frameWidth + 2}px` : '-6px';
-                    particle.style.top = `${(Math.floor(index / 4) % 6) * frameHeight / 6}px`;
-                }
-                particle.style.setProperty('--dust-x', `${Math.round(Math.random() * 60 - 30)}px`);
-                particle.style.setProperty('--dust-y', `${Math.round(Math.random() * -70 - 10)}px`);
-                particle.style.setProperty('--dust-rotate', `${Math.round(Math.random() * 240 - 120)}deg`);
-                particle.style.setProperty('--dust-delay', `${Math.random() * 180}ms`);
-                frame.appendChild(particle);
+                onValue(ref(db, `rooms/${code}/joinInfoVisible`), snapshot => {
+                    updateBeamerJoinInfoControl(snapshot.val() === true);
+                });
+                onValue(ref(db, `rooms/${code}/currentQuestion`), snapshot => {
+                    setBeamerJoinInfoAvailable(Number(snapshot.val()) < 0);
+                });
+            } catch (error) {
+                console.error('Host-Session konnte nicht gestartet werden:', error);
+                window.showAppToast('Host-Session konnte nicht gestartet werden. Bitte prüfe die Internetverbindung.');
+            } finally {
+                startButton.disabled = false;
             }
-
-            document.getElementById('host-qr-status').innerText = 'Ein Teilnehmer ist dem Raum beigetreten.';
-            window.setTimeout(() => {
-                frame.querySelectorAll('.qr-dust-particle').forEach(particle => particle.remove());
-                frame.dataset.animating = 'false';
-            }, 1200);
-        }
+        };
 
         function checkAllPlayersAnswered(players) {
             if (currentQuestionIndex < 0) return;
@@ -1617,6 +1786,7 @@
         window.nextQuestion = function() {
             currentQuestionIndex++;
             if (currentQuestionIndex >= careerQuestions.length) return alert('Quiz beendet!');
+            setBeamerJoinInfoAvailable(false);
 
             const qData = careerQuestions[currentQuestionIndex];
             const selectedDuration = parseInt(document.getElementById('timer-duration-select').value) || 15;
@@ -1649,7 +1819,8 @@
             update(ref(db, `rooms/${currentRoom}`), { 
                 currentQuestion: currentQuestionIndex,
                 isRevealed: false,
-                timeLeft: selectedDuration
+                timeLeft: selectedDuration,
+                joinInfoVisible: false
             });
 
             if (serverTimer) clearInterval(serverTimer);
@@ -1690,7 +1861,7 @@
             const name = document.getElementById('player-name').value.trim();
             const code = document.getElementById('room-code-input').value.trim().toUpperCase();
             if (!name || code.length !== 4) {
-                showAppToast(!name ? 'Bitte gib deinen Namen ein!' : 'Bitte gib einen gültigen 4-stelligen Raumcode ein!');
+                window.showAppToast(!name ? 'Bitte gib deinen Namen ein!' : 'Bitte gib einen gültigen 4-stelligen Raumcode ein!');
                 return;
             }
 
