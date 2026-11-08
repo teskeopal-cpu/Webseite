@@ -468,7 +468,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-sm font-extrabold text-slate-100">Fragen-Editor</h2>
-                    <p class="text-[11px] text-slate-400">Nur Hinweise und Punkte der fünf festen Fragen sind bearbeitbar und werden auf allen Geräten gespeichert.</p>
+                    <p class="text-[11px] text-slate-400">Hinweise, Punkte und die Fragezeit (45 oder 110 Sekunden) der fünf festen Fragen werden auf allen Geräten gespeichert.</p>
                 </div>
                 <button type="button" onclick="closeQuestionEditor()" class="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-300" title="Editor schließen">✕</button>
             </div>
@@ -494,22 +494,6 @@
 
             <div id="host-join-info-status" class="text-center text-[10px] text-slate-500" aria-live="polite">
                 QR-Code und Raumcode sind auf der Tafel ausgeblendet.
-            </div>
-
-            <!-- TIMER-AUSWAHL -->
-            <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">⏱️ Timer-Dauer:</span>
-                <select id="timer-duration-select" class="bg-slate-900 border border-slate-800 text-xs font-bold text-indigo-400 p-2 rounded-xl focus:outline-none">
-                    <option value="5">5 Sekunden</option>
-                    <option value="10">10 Sekunden</option>
-                    <option value="15" selected>15 Sekunden</option>
-                    <option value="20">20 Sekunden</option>
-                    <option value="25">25 Sekunden</option>
-                    <option value="30">30 Sekunden</option>
-                    <option value="35">35 Sekunden</option>
-                    <option value="40">40 Sekunden</option>
-                    <option value="45">45 Sekunden</option>
-                </select>
             </div>
 
             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
@@ -813,7 +797,7 @@
         "max": 10,
         "min": 0,
         "moderation": "3-5 Jahre",
-        "question": "Wie lange dauert es, um als Appentwickler*in gute Anwendungen entwickeln zu können?",
+        "question": "Wie viele Jahre dauert es, um als Appentwickler*in gute Anwendungen entwickeln zu können?",
         "step": 1,
         "tolerance": 1,
         "type": "estimate"
@@ -983,7 +967,7 @@
         const embeddedQuestionBank = JSON.parse(document.getElementById('embedded-question-bank').textContent);
         const defaultCareerQuestions = embeddedQuestionBank.map(question => normalizeQuestion(question)).filter(Boolean);
 
-        const QUESTION_BANK_VERSION = 5;
+        const QUESTION_BANK_VERSION = 7;
         let careerQuestions = [];
         let questionBankReady = null;
         let playerSortOrder = [];
@@ -1058,8 +1042,10 @@
                 id: typeof question.id === 'string' ? question.id : makeQuestionId(),
                 type,
                 question: question.question.trim(),
-                moderation: typeof question.moderation === 'string' ? question.moderation : ''
+                moderation: typeof question.moderation === 'string' ? question.moderation : '',
+                duration: Number(question.duration ?? 45)
             };
+            if (![45, 110].includes(normalized.duration)) return null;
 
             if (type === 'choice') {
                 if (!Array.isArray(question.options) || question.options.length !== 4 || question.options.some(option => typeof option !== 'string')) return null;
@@ -1114,13 +1100,16 @@
                 delete expectedContent.moderation;
                 delete actualContent.points;
                 delete expectedContent.points;
+                delete actualContent.duration;
+                delete expectedContent.duration;
                 return JSON.stringify(actualContent) === JSON.stringify(expectedContent);
             });
         }
 
-        async function persistQuestionEditorChanges(questionId, moderation, points) {
+        async function persistQuestionEditorChanges(questionId, moderation, points, duration) {
             const expectedQuestion = defaultCareerQuestions.find(question => question.id === questionId);
             if (!expectedQuestion || typeof moderation !== 'string' || moderation.length > 500) return false;
+            if (![45, 110].includes(duration)) return false;
             if (expectedQuestion.type === 'choice'
                 ? !Array.isArray(points) || points.length !== 4 || points.some(value => !Number.isInteger(value))
                 : !Number.isInteger(points)) return false;
@@ -1133,7 +1122,7 @@
                     return;
                 }
                 const questions = bank.questions.map(question => question.id === questionId
-                    ? { ...question, moderation, points }
+                    ? { ...question, moderation, points, duration }
                     : question);
                 return {
                     updatedAt: Date.now(),
@@ -1176,13 +1165,17 @@
                         const current = normalizeQuestionBank(currentBank);
                         if (current && current.questionBankVersion >= QUESTION_BANK_VERSION && hasExpectedQuestionSet(current.questions)) return;
                         const existingQuestions = new Map((current?.questions || []).map(question => [question.id, question]));
-                        const questions = defaultCareerQuestions.map(question => ({
-                            ...question,
-                            moderation: existingQuestions.get(question.id)?.moderation ?? question.moderation,
-                            points: question.type === 'choice'
-                                ? (Array.isArray(existingQuestions.get(question.id)?.points) ? existingQuestions.get(question.id).points : question.points)
-                                : (Number.isInteger(existingQuestions.get(question.id)?.points) ? existingQuestions.get(question.id).points : (question.points ?? 100))
-                        }));
+                        const questions = defaultCareerQuestions.map(question => {
+                            const existingQuestion = existingQuestions.get(question.id);
+                            return {
+                                ...question,
+                                moderation: existingQuestion?.moderation ?? question.moderation,
+                                duration: [45, 110].includes(existingQuestion?.duration) ? existingQuestion.duration : 45,
+                                points: question.type === 'choice'
+                                    ? (Array.isArray(existingQuestion?.points) ? existingQuestion.points : question.points)
+                                    : (Number.isInteger(existingQuestion?.points) ? existingQuestion.points : (question.points ?? 100))
+                            };
+                        });
                         return {
                             updatedAt: Date.now(),
                             questionBankVersion: QUESTION_BANK_VERSION,
@@ -1287,13 +1280,30 @@
                 hintInput.setAttribute('aria-label', `Hinweis zu Frage ${index + 1}`);
                 hintInput.className = 'mt-1 w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100';
                 hintLabel.appendChild(hintInput);
+                const durationLabel = document.createElement('label');
+                durationLabel.className = 'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-xs font-semibold text-slate-300';
+                durationLabel.textContent = 'Zeit für diese Frage';
+                const durationSelect = document.createElement('select');
+                durationSelect.className = 'rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-bold text-indigo-300';
+                durationSelect.setAttribute('aria-label', `Zeit für Frage ${index + 1}`);
+                [
+                    { value: 45, label: '45 Sekunden' },
+                    { value: 110, label: '110 Sekunden' }
+                ].forEach(optionData => {
+                    const option = document.createElement('option');
+                    option.value = String(optionData.value);
+                    option.textContent = optionData.label;
+                    durationSelect.appendChild(option);
+                });
+                durationSelect.value = String([45, 110].includes(question.duration) ? question.duration : 45);
+                durationLabel.appendChild(durationSelect);
                 const saveButton = document.createElement('button');
                 saveButton.type = 'button';
                 saveButton.className = 'w-full bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs py-2.5 rounded-xl text-white';
                 saveButton.textContent = 'Änderungen speichern';
                 const pointsInputs = [...row.querySelectorAll('input[type="number"]')];
-                saveButton.addEventListener('click', () => saveQuestionEditorChanges(question.id, hintInput.value, pointsInputs, saveButton));
-                row.append(hintLabel, saveButton);
+                saveButton.addEventListener('click', () => saveQuestionEditorChanges(question.id, hintInput.value, pointsInputs, durationSelect.value, saveButton));
+                row.append(hintLabel, durationLabel, saveButton);
                 list.appendChild(row);
             });
         }
@@ -1315,10 +1325,15 @@
             document.getElementById('home-screen').classList.remove('hidden');
         };
 
-        async function saveQuestionEditorChanges(questionId, moderation, pointsInputs, button) {
+        async function saveQuestionEditorChanges(questionId, moderation, pointsInputs, durationValue, button) {
             const status = document.getElementById('question-editor-status');
             if (typeof moderation !== 'string' || moderation.length > 500 || !defaultCareerQuestions.some(question => question.id === questionId)) {
                 status.innerText = 'Hinweis ungueltig. Es wurden keine Aenderungen gespeichert.';
+                return;
+            }
+            const duration = Number(durationValue);
+            if (![45, 110].includes(duration)) {
+                status.innerText = 'Bitte eine Fragezeit von 45 oder 110 Sekunden wählen.';
                 return;
             }
 
@@ -1337,13 +1352,13 @@
             status.innerText = 'Aenderungen werden auf allen Geraeten gespeichert...';
             try {
                 await questionBankReady;
-                const saved = await persistQuestionEditorChanges(questionId, moderation, points);
+                const saved = await persistQuestionEditorChanges(questionId, moderation, points, duration);
                 if (!saved) {
                     status.innerText = 'Speichern fehlgeschlagen: Der gemeinsame Fragenbestand ist nicht erreichbar oder stimmt nicht ueberein.';
                     return;
                 }
                 renderQuestionEditor();
-                status.innerText = 'Hinweis und Punkte dauerhaft auf allen Geraeten gespeichert.';
+                status.innerText = 'Hinweis, Punkte und Fragezeit dauerhaft auf allen Geräten gespeichert.';
             } catch (error) {
                 console.error('Fragenhinweis oder Antwortpunkte konnten nicht gemeinsam gespeichert werden:', error);
                 status.innerText = 'Speichern fehlgeschlagen. Bitte Internetverbindung pruefen; Aenderungen wurden nicht als gespeichert markiert.';
@@ -2066,7 +2081,7 @@
             setBeamerJoinInfoAvailable(false);
 
             const qData = careerQuestions[currentQuestionIndex];
-            const selectedDuration = parseInt(document.getElementById('timer-duration-select').value) || 15;
+            const selectedDuration = [45, 110].includes(qData.duration) ? qData.duration : 45;
 
             document.getElementById('host-game-status').innerText = `Frage ${currentQuestionIndex + 1} / ${careerQuestions.length}`;
             document.getElementById('host-current-question-text').innerText = qData.question;
