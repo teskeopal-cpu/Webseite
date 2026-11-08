@@ -11,24 +11,37 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #090a0f;
+            background-color: #8ec5fc;
+            background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
+        }
+        button, input, select, textarea {
+            font: inherit;
+        }
+        button {
+            touch-action: manipulation;
+        }
+        #app button:not(.emoji-option) {
+            min-height: 44px;
         }
 
         /* --- ULTRA-MODERN BACKGROUND --- */
         .glow-bg {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; overflow: hidden; filter: blur(80px);
-            opacity: 0.6; pointer-events: none;
+            z-index: -1; overflow: hidden; pointer-events: none;
+            background:
+                radial-gradient(ellipse at 18% 22%, rgba(99, 102, 241, 0.12), transparent 42%),
+                radial-gradient(ellipse at 82% 30%, rgba(139, 92, 246, 0.10), transparent 40%),
+                radial-gradient(ellipse at 48% 92%, rgba(59, 130, 246, 0.09), transparent 45%);
         }
         .glow-blob {
             position: absolute;
             width: 500px; height: 500px; border-radius: 50%;
-            mix-blend-mode: screen;
-            animation: float 20s infinite alternate ease-in-out;
+            display: none;
         }
         @keyframes float {
             0% { transform: translate(0, 0) scale(1); }
@@ -77,9 +90,9 @@
             font-size: 16px !important;
         }
         .input-apple:focus {
-            transform: scale(1.1) translateY(-5px);
+            transform: translateY(-2px);
             background: rgba(10, 12, 20, 0.9) !important;
-            box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.6), 0 0 0 3px rgba(99, 102, 241, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
             border-color: rgba(99, 102, 241, 1) !important;
             outline: none;
             z-index: 50;
@@ -140,6 +153,131 @@
 
         .screen-transition {
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #beamer-screen-container {
+            isolation: isolate;
+            background-color: #168fc9;
+            background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            background-size: 200% 100%;
+            background-position: 0% 50%;
+            animation: beamer-gradient-shift 18s ease-in-out infinite alternate;
+            color: #102338;
+        }
+        #beamer-screen-container > :not(#beamer-join-info) {
+            position: relative;
+            z-index: 1;
+        }
+        #beamer-screen-container #beamer-question-text,
+        #beamer-screen-container #beamer-waiting-view h1,
+        #beamer-screen-container #beamer-final-leaderboard-view h1 {
+            color: #102338 !important;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.25);
+        }
+        #beamer-screen-container #beamer-options-grid > * {
+            color: #f8fafc !important;
+            background: rgba(15, 23, 42, 0.9) !important;
+            border-color: rgba(255, 255, 255, 0.45) !important;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+        }
+        #beamer-screen-container #beamer-options-grid > * > span:first-child {
+            color: #e0f2fe !important;
+            background: rgba(79, 172, 254, 0.24) !important;
+        }
+        #beamer-screen-container #beamer-live-status-list > * {
+            color: #f8fafc !important;
+            background: rgba(15, 23, 42, 0.88) !important;
+            border-color: rgba(255, 255, 255, 0.35) !important;
+        }
+        @keyframes beamer-gradient-shift {
+            from { background-position: 0% 50%; }
+            to { background-position: 100% 50%; }
+        }
+        #player-waiting-screen {
+            color: #172033;
+            background: linear-gradient(to top, #9890e3 0%, #b1f4cf 100%) !important;
+            background-size: 100% 150%;
+            animation: player-waiting-gradient 9s ease-in-out infinite alternate;
+            border-color: rgba(255, 255, 255, 0.65);
+            box-shadow: 0 18px 50px rgba(62, 83, 123, 0.18);
+        }
+        #player-waiting-screen h3 {
+            color: #172033;
+        }
+        #player-waiting-screen p {
+            color: #334155;
+        }
+        @keyframes player-waiting-gradient {
+            from { background-position: 50% 0%; }
+            to { background-position: 50% 100%; }
+        }
+
+        @keyframes leaderboard-rise {
+            from { opacity: 0; transform: translateY(28px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes leaderboard-glow {
+            0%, 100% { box-shadow: 0 0 24px rgba(99, 102, 241, 0.12); }
+            50% { box-shadow: 0 0 44px rgba(99, 102, 241, 0.3); }
+        }
+        .leaderboard-entry {
+            opacity: 0;
+            animation: leaderboard-rise 650ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: var(--leaderboard-delay, 0ms);
+        }
+        .leaderboard-champion {
+            animation: leaderboard-rise 850ms cubic-bezier(0.16, 1, 0.3, 1) forwards, leaderboard-glow 2.8s ease-in-out 900ms infinite;
+        }
+        .profile-emoji-input {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 2rem;
+            line-height: 1;
+            caret-color: #a5b4fc;
+        }
+        .profile-emoji-input::placeholder {
+            color: #64748b;
+            opacity: 1;
+            font-size: 1.5rem;
+        }
+        .profile-emoji-input:focus {
+            outline: 2px solid rgba(129, 140, 248, 0.9);
+            outline-offset: 3px;
+            border-color: rgba(129, 140, 248, 0.9);
+        }
+        .player-question-progress-fill {
+            transition: width 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 0.75rem;
+                justify-content: flex-start;
+            }
+            #app {
+                min-height: calc(100dvh - 1.5rem);
+                padding: 1.25rem;
+                border-radius: 2rem;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .leaderboard-entry, .leaderboard-champion {
+                opacity: 1;
+                animation: none;
+            }
+            .profile-emoji-input, .btn-apple, .input-apple {
+                transition: none !important;
+            }
+            .glow-blob {
+                animation: none;
+            }
+            #beamer-screen-container {
+                animation: none;
+            }
+            #player-waiting-screen {
+                animation: none;
+            }
         }
 
         /* App-style Toasts for notifications */
@@ -227,7 +365,7 @@
     </style>
     </style>
 </head>
-<body class="bg-[#090a0f] text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
+<body class="text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
 
     <div class="glow-bg">
         <div class="glow-blob bg-indigo-600/30" style="top: -10%; left: -10%;"></div>
@@ -236,17 +374,17 @@
     </div>
 
     <!-- Hauptcontainer -->
-    <div id="app" class="w-full max-w-2xl min-h-[360px] bg-[#12141c]/60 border border-slate-800/50 p-8 md:p-12 rounded-[3rem] shadow-2xl apple-blur relative fade-in flex flex-col justify-center">
+    <div id="app" class="w-full max-w-3xl min-h-[420px] bg-[#12141c]/75 border border-slate-700/60 p-6 md:p-10 rounded-[2.5rem] shadow-2xl apple-blur relative fade-in flex flex-col justify-center">
         
         <!-- Header -->
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800/60">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-xl font-bold">
                     ⚡
                 </div>
                 <div class="overflow-hidden">
-                    <h1 class="text-base font-extrabold tracking-tight text-slate-100 typing-text">Coding Quiz</h1>
-                    <p class="text-[11px] text-slate-400 font-medium">Raumsystem</p>
+                    <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-slate-100">Coding Quiz</h1>
+                    <p class="text-sm text-slate-400 font-medium">Christian</p>
                 </div>
             </div>
             
@@ -264,7 +402,8 @@
         <!-- 1. Startbildschirm -->
         <div id="home-screen" class="space-y-6 fade-in screen-transition">
             <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800/80 space-y-1">
-                <p class="text-xs text-indigo-400 font-semibold">Bereit zum Starten</p>
+                <p class="text-lg font-extrabold text-slate-100">Bereit zum Spielen?</p>
+                <p class="text-sm text-slate-400">Tritt mit deinem Namen und einem eigenen Emoji einem Quiz bei.</p>
             </div>
 
             <button id="secret-host-btn" onclick="createRoom()" class="hidden w-full bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs py-4 rounded-2xl transition shadow-lg shadow-indigo-600/20 active:scale-[0.99] fade-in">
@@ -275,7 +414,7 @@
                 ✏️ Fragen dauerhaft bearbeiten
             </button>
 
-            <button onclick="showJoinScreen()" class="w-full bg-gradient-to-br from-indigo-600 to-violet-700 hover:from-indigo-500 hover:to-violet-600 border border-indigo-400/30 font-bold text-base py-6 rounded-3xl btn-apple text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] transition-all duration-300 group relative overflow-hidden">
+            <button onclick="showJoinScreen()" class="w-full min-h-16 bg-gradient-to-br from-indigo-600 to-violet-700 hover:from-indigo-500 hover:to-violet-600 border border-indigo-400/30 font-bold text-lg py-5 rounded-3xl btn-apple text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] transition-all duration-300 group relative overflow-hidden">
                 <span class="relative z-10 flex items-center justify-center gap-3">
                     <span class="text-xl group-hover:scale-125 transition-transform duration-300">🎮</span>
                     Als Spieler beitreten
@@ -286,76 +425,55 @@
 
         <!-- 2. Beitreten-Bildschirm -->
         <div id="join-screen" class="hidden space-y-6 fade-in screen-transition">
-            <div class="space-y-3">
+            <div class="space-y-5">
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Benutzername</label>
+                    <h2 class="text-2xl font-extrabold text-slate-100">Mach mit!</h2>
+                    <p class="mt-1 text-sm text-slate-400">Tippe auf den Kreis, wähle ein Emoji über deine Tastatur und gib deine Daten ein.</p>
+                </div>
+                <section class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4" aria-labelledby="player-avatar-title">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <div>
+                            <h3 id="player-avatar-title" class="text-sm font-bold text-slate-100">Dein Profil-Emoji</h3>
+                            <p id="player-emoji-help" class="text-xs text-slate-400">Profil-Emoji auswählen</p>
+                        </div>
+                        <input id="player-emoji-input" type="text" class="profile-emoji-input shrink-0 border border-indigo-400/40 bg-indigo-500/10 text-slate-100 transition focus:outline-none" placeholder="＋" maxlength="12" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Profil-Emoji eingeben" aria-describedby="player-emoji-help">
+                    </div>
+                </section>
+                <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2" for="player-name">Dein Name</label>
                 <div class="relative">
-                    <input type="text" id="player-name" placeholder="z.B. Alex" class="w-full p-3.5 bg-slate-950/50 border border-slate-800 rounded-2xl text-xs focus:outline-none focus:border-indigo-500 input-apple opacity-0 pointer-events-none absolute inset-0">
-                    <div id="player-name-display" class="w-full p-3.5 bg-slate-950/50 border border-slate-800 rounded-2xl text-xs min-h-[54px] flex items-center justify-center gap-1 cursor-pointer">
+                    <input type="text" id="player-name" placeholder="z. B. Alex" maxlength="24" autocomplete="nickname" aria-label="Dein Name" class="w-full p-4 bg-slate-950/70 border border-slate-700 rounded-2xl text-base focus:outline-none focus:border-indigo-500 input-apple opacity-0 pointer-events-none absolute inset-0">
+                    <div id="player-name-display" class="w-full p-4 bg-slate-950/70 border border-slate-700 rounded-2xl text-base min-h-[56px] flex items-center justify-center gap-1 cursor-text" aria-hidden="true">
                         <span class="text-slate-600">z.B. Alex</span>
                     </div>
                 </div>
                 </div>
+                <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-2" for="room-code-input">Vierstelliger Raumcode</label>
                 <div class="relative">
-                    <input type="text" id="room-code-input" placeholder="1234" maxlength="4" inputmode="numeric" pattern="[0-9]*" class="w-full p-3.5 bg-slate-950/50 border border-slate-800 rounded-2xl uppercase tracking-widest text-center font-mono text-base focus:outline-none focus:border-indigo-500 input-apple opacity-0 pointer-events-none absolute inset-0">
-                    <div id="room-code-display" class="w-full p-3.5 bg-slate-950/50 border border-slate-800 rounded-2xl uppercase tracking-widest text-center font-mono text-base min-h-[54px] flex items-center justify-center gap-1 cursor-pointer">
+                    <input type="text" id="room-code-input" placeholder="z. B. 1234" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Vierstelliger Raumcode" class="w-full p-4 bg-slate-950/70 border border-slate-700 rounded-2xl uppercase tracking-[0.3em] text-center font-mono text-xl focus:outline-none focus:border-indigo-500 input-apple opacity-0 pointer-events-none absolute inset-0">
+                    <div id="room-code-display" class="w-full p-4 bg-slate-950/70 border border-slate-700 rounded-2xl uppercase tracking-[0.3em] text-center font-mono text-xl min-h-[56px] flex items-center justify-center gap-1 cursor-text" aria-hidden="true">
                         <span class="text-slate-600">1234</span>
                     </div>
                 </div>
+                </div>
             </div>
-            <button onclick="joinRoom()" class="w-full bg-indigo-600 hover:bg-indigo-500 font-bold text-sm py-4 rounded-2xl btn-apple text-white shadow-lg shadow-indigo-600/20">Verbinden</button>
-            <button onclick="showHomeScreen()" class="w-full text-slate-500 hover:text-slate-300 text-xs py-2 font-medium">Zurück</button>
+            <button onclick="joinRoom()" class="w-full min-h-14 bg-indigo-600 hover:bg-indigo-500 font-bold text-base py-4 rounded-2xl btn-apple text-white shadow-lg shadow-indigo-600/20">Quiz beitreten →</button>
+            <button onclick="showHomeScreen()" class="w-full min-h-11 text-slate-400 hover:text-slate-200 text-sm py-2 font-medium">Zurück</button>
+        </div>
         </div>
 
         <div id="question-editor-screen" class="hidden space-y-4 fade-in">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-sm font-extrabold text-slate-100">Fragen-Editor</h2>
-                    <p class="text-[11px] text-slate-400">Änderungen gelten auch für zukünftige Spiele.</p>
+                    <p class="text-[11px] text-slate-400">Nur Hinweise und Punkte der fünf festen Fragen sind bearbeitbar und werden auf allen Geräten gespeichert.</p>
                 </div>
                 <button type="button" onclick="closeQuestionEditor()" class="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-300" title="Editor schließen">✕</button>
             </div>
             <p id="question-editor-status" class="min-h-4 text-[11px] text-emerald-400" aria-live="polite"></p>
-            <div id="question-editor-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
-            <form id="question-editor-form" class="space-y-3 border-t border-slate-800 pt-4" onsubmit="saveEditorQuestion(event)" novalidate>
-                <div class="flex items-center justify-between">
-                    <h3 id="question-editor-form-title" class="text-xs font-bold text-slate-200">Neue Frage</h3>
-                    <button type="button" onclick="newEditorQuestion()" class="text-xs text-indigo-300 hover:text-indigo-200">＋ Neue Frage</button>
-                </div>
-                <label class="block text-[10px] font-semibold text-slate-400">Fragetext
-                    <textarea id="editor-question-text" maxlength="300" rows="2" class="mt-1 w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100"></textarea>
-                </label>
-                <label class="block text-[10px] font-semibold text-slate-400">Fragetyp
-                    <select id="editor-question-type" onchange="updateEditorQuestionType()" class="mt-1 w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100">
-                        <option value="choice">Multiple Choice</option>
-                        <option value="estimate">Schätzfrage mit Regler</option>
-                        <option value="sort">Sortierfrage</option>
-                    </select>
-                </label>
-                <div id="editor-choice-fields" class="space-y-2">
-                    <p class="text-[10px] text-slate-400">Richtige Antworten markieren und Punkte je Antwort festlegen. Richtige Teilauswahlen geben Teilpunkte.</p>
-                    <div class="grid grid-cols-[auto_minmax(0,1fr)_76px] items-center gap-2"><input type="checkbox" name="editor-correct" value="0" aria-label="Antwort A ist richtig"><input id="editor-option-0" maxlength="120" placeholder="Antwort A (optional)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"><input id="editor-points-0" type="number" step="1" value="100" aria-label="Punkte für Antwort A" title="Punkte für Antwort A" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></div>
-                    <div class="grid grid-cols-[auto_minmax(0,1fr)_76px] items-center gap-2"><input type="checkbox" name="editor-correct" value="1" aria-label="Antwort B ist richtig"><input id="editor-option-1" maxlength="120" placeholder="Antwort B (optional)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"><input id="editor-points-1" type="number" step="1" value="100" aria-label="Punkte für Antwort B" title="Punkte für Antwort B" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></div>
-                    <div class="grid grid-cols-[auto_minmax(0,1fr)_76px] items-center gap-2"><input type="checkbox" name="editor-correct" value="2" aria-label="Antwort C ist richtig"><input id="editor-option-2" maxlength="120" placeholder="Antwort C (optional)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"><input id="editor-points-2" type="number" step="1" value="100" aria-label="Punkte für Antwort C" title="Punkte für Antwort C" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></div>
-                    <div class="grid grid-cols-[auto_minmax(0,1fr)_76px] items-center gap-2"><input type="checkbox" name="editor-correct" value="3" aria-label="Antwort D ist richtig"><input id="editor-option-3" maxlength="120" placeholder="Antwort D (optional)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"><input id="editor-points-3" type="number" step="1" value="100" aria-label="Punkte für Antwort D" title="Punkte für Antwort D" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></div>
-                </div>
-                <div id="editor-estimate-fields" class="hidden grid grid-cols-2 gap-2">
-                    <label class="text-[10px] text-slate-400">Minimum<input id="editor-estimate-min" type="number" value="0" class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></label>
-                    <label class="text-[10px] text-slate-400">Maximum<input id="editor-estimate-max" type="number" value="100" class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></label>
-                    <label class="text-[10px] text-slate-400">Schrittweite<input id="editor-estimate-step" type="number" value="1" min="0.01" step="any" class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></label>
-                    <label class="text-[10px] text-slate-400">Richtige Zahl<input id="editor-estimate-correct" type="number" value="50" step="any" class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></label>
-                    <label class="col-span-2 text-[10px] text-slate-400">Toleranz (+/−)<input id="editor-estimate-tolerance" type="number" value="5" min="0" step="any" class="mt-1 w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs"></label>
-                </div>
-                <div id="editor-sort-fields" class="hidden space-y-2">
-                    <p class="text-[10px] text-slate-400">Elemente in der richtigen Reihenfolge eintragen</p>
-                    <div id="editor-sort-items" class="space-y-2"></div>
-                    <button type="button" onclick="addEditorSortItem()" class="text-xs text-indigo-300 hover:text-indigo-200">＋ Element hinzufügen</button>
-                </div>
-                <label class="block text-[10px] font-semibold text-slate-400">Hinweis (optional)
-                    <textarea id="editor-question-moderation" maxlength="500" rows="2" class="mt-1 w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100"></textarea>
-                </label>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs py-3 rounded-xl text-white">Frage speichern</button>
-            </form>
+            <div id="question-editor-list" class="space-y-3 max-h-[65vh] overflow-y-auto pr-1"></div>
         </div>
 
         <!-- 3. Host-Ansicht -->
@@ -432,11 +550,22 @@
         <div id="player-game-screen" class="hidden space-y-6 fade-in">
             <div class="liquid-glass p-4 rounded-3xl border border-slate-800 flex justify-between items-center px-6 shadow-xl">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-xs font-bold text-indigo-400">👤</div>
-                    <span id="player-display-name" class="font-bold text-sm text-slate-100">Spieler</span>
+                    <span id="player-profile-emoji" class="w-11 h-11 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-2xl" aria-hidden="true">👤</span>
+                    <span id="player-display-name" class="font-bold text-base text-slate-100">Spieler</span>
                 </div>
                 <div class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs px-4 py-1.5 rounded-full font-bold shadow-inner">
                     Punkte: <span id="player-score" class="font-mono">0</span>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <div class="w-40 max-w-full rounded-full border border-white/50 bg-white/70 px-3 py-2 shadow-sm backdrop-blur-sm" role="progressbar" aria-label="Quizfortschritt" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="flex items-center justify-between gap-2 text-[11px] leading-none">
+                        <span id="player-questions-remaining-label" class="font-semibold text-slate-600">Fragen übrig</span>
+                        <span id="player-questions-remaining" class="font-extrabold tabular-nums text-slate-800">0</span>
+                    </div>
+                    <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-900/10">
+                        <div id="player-question-progress-fill" class="player-question-progress-fill h-full w-0 rounded-full bg-gradient-to-r from-indigo-500 to-emerald-400"></div>
+                    </div>
                 </div>
             </div>
 
@@ -559,7 +688,7 @@
     </div>
 
     <!-- 8. SEPARATER VOLLBILD TAFEL-MODUS -->
-    <div id="beamer-screen-container" class="hidden fixed inset-0 bg-[#07080c] z-50 p-8 flex flex-col justify-between fade-in">
+    <div id="beamer-screen-container" class="hidden fixed inset-0 overflow-y-auto z-50 p-4 md:p-8 flex flex-col justify-between fade-in">
         <div class="flex justify-between items-center border-b border-slate-800/80 pb-4">
             <div class="flex items-center gap-3">
                 <span class="text-xl">🖥️</span>
@@ -615,6 +744,16 @@
                     <div id="beamer-answer-stats" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-slate-200"></div>
                 </div>
             </div>
+
+            <div id="beamer-final-leaderboard-view" class="hidden space-y-7">
+                <div class="space-y-3">
+                    <span class="inline-flex px-4 py-1.5 bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-bold rounded-full uppercase tracking-wider">🏁 Spiel beendet</span>
+                    <h1 class="text-4xl md:text-6xl font-extrabold text-slate-100">Das Endergebnis</h1>
+                    <p id="beamer-final-subtitle" class="text-sm md:text-base text-slate-400"></p>
+                </div>
+                <div id="beamer-final-podium" class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5 items-end max-w-4xl mx-auto"></div>
+                <div id="beamer-final-ranking" class="space-y-2 max-h-[28vh] overflow-y-auto max-w-3xl mx-auto px-1"></div>
+            </div>
         </div>
 
         <div class="text-center text-[11px] text-slate-600 border-t border-slate-900 pt-4">
@@ -625,17 +764,16 @@
     <script type="application/json" id="embedded-question-bank">
     [
       {
+        "correct": [
+          1
+        ],
         "id": "a6d46090-2939-4da8-9d82-6bbaf3b0f3b2",
-        "type": "choice",
-        "question": "Ist ein Studienabschluss notwendig, um App-Entwickler*in zu werden?",
+        "moderation": "Verschiedene Möglichkeiten",
         "options": [
           "Ja",
           "Nein",
           "",
           ""
-        ],
-        "correct": [
-          1
         ],
         "points": [
           0,
@@ -643,63 +781,76 @@
           0,
           0
         ],
-        "moderation": "Verschiedene Möglichkeiten"
+        "question": "Ist ein Studienabschluss notwendig, um App-Entwickler*in zu werden?",
+        "type": "choice"
       },
       {
+        "correct": [
+          0,
+          1,
+          3
+        ],
         "id": "728f3804-74bc-4df4-b398-7bc6442f1763",
-        "type": "choice",
-        "question": "Welche Möglichkeiten gibt es, um App-Entwickler*inn zu werden?",
+        "moderation": "Nicht jede professionell klingende Berufsausbildung existiert tatsächlich",
         "options": [
           "Informatikstudium",
           "Selbstudium  (z.B Onlinekurse, Tutorials)",
           "Ausbildung als Diplom-Informatikassistent*in für Softwarearchitektur",
           "Ausbildung als Fachinformatiker*in"
         ],
-        "correct": [
-          0,
-          1,
-          3
-        ],
         "points": [
           1,
           1,
           -1,
           1
         ],
-        "moderation": "Nicht jede professionell klingende Berufsausbildung existiert tatsächlich"
+        "question": "Welche Möglichkeiten gibt es, um App-Entwickler*inn zu werden?",
+        "type": "choice"
       },
       {
-        "id": "a9cb07c7-8d7e-4129-8730-7a1383fa23ca",
-        "type": "estimate",
-        "question": "Wie lange dauert es, um als Appentwickler*in gute Anwendungen entwickeln zu können?",
-        "min": 0,
-        "max": 10,
-        "step": 1,
         "correct": 4,
+        "id": "a9cb07c7-8d7e-4129-8730-7a1383fa23ca",
+        "max": 10,
+        "min": 0,
+        "moderation": "3-5 Jahre",
+        "question": "Wie lange dauert es, um als Appentwickler*in gute Anwendungen entwickeln zu können?",
+        "step": 1,
         "tolerance": 1,
-        "moderation": "3-5 Jahre"
+        "type": "estimate"
       },
       {
+        "correct": [
+          1,
+          3
+        ],
         "id": "45187d08-500f-4c48-9664-dfa162aa5d80",
-        "type": "choice",
-        "question": "Ist Softwareentwickler*in und App-Entwickler*in der gleiche Beruf?",
+        "moderation": "Sofwareentwickler*in ist Überbegriff\nApp-Entwickler*in ist ein/e spezialisierte/r Softwareentwickler*in",
         "options": [
           "Ja",
           "Nein",
           "Jede/r  Softwareentwickler*in  ist auch  App-Entwickler*in",
           "Jede/r  App-Entwickler*in  ist auch  Softwareentwickler*in"
         ],
-        "correct": [
-          1,
-          3
-        ],
         "points": [
           -1,
           1,
           -1,
           1
         ],
-        "moderation": "Sofwareentwickler*in ist Überbegriff\nApp-Entwickler*in ist ein/e spezialisierte/r Softwareentwickler*in"
+        "question": "Ist Softwareentwickler*in und App-Entwickler*in der gleiche Beruf?",
+        "type": "choice"
+      },
+      {
+        "id": "699af4ab-e2ef-4316-a718-a25574966b2f",
+        "items": [
+          "(Selbst-)Studium oder Ausbildung",
+          "Programmiersprache(n) wählen",
+          "Übungsprojekt erarbeiten",
+          "Bewerbung bei einem Softwareunternehmen"
+        ],
+        "moderation": "Nur beim  ersten Schritt gibt es verschiedene Möglichkeiten",
+        "question": "Wie ist der Werdegang eines App-Enwicklers (Sortiere die Antworten in die richtige Reihenfolge)",
+        "type": "sort"
       }
     ]
     </script>
@@ -832,11 +983,47 @@
         const embeddedQuestionBank = JSON.parse(document.getElementById('embedded-question-bank').textContent);
         const defaultCareerQuestions = embeddedQuestionBank.map(question => normalizeQuestion(question)).filter(Boolean);
 
-        const QUESTION_BANK_VERSION = 2;
+        const QUESTION_BANK_VERSION = 5;
         let careerQuestions = [];
         let questionBankReady = null;
-        let editingQuestionId = null;
         let playerSortOrder = [];
+        let selectedPlayerEmoji = '';
+        const playerEmojiInput = document.getElementById('player-emoji-input');
+        const emojiSegmenter = typeof Intl.Segmenter === 'function'
+            ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+            : null;
+
+        function getFirstGrapheme(value) {
+            const trimmed = value.trim();
+            if (!trimmed) return '';
+            return emojiSegmenter
+                ? emojiSegmenter.segment(trimmed)[Symbol.iterator]().next().value.segment
+                : Array.from(trimmed)[0];
+        }
+
+        function isEmoji(value) {
+            return /(?:\p{Extended_Pictographic}|\p{Regional_Indicator}{2}|[#*0-9]\uFE0F?\u20E3)/u.test(value);
+        }
+
+        playerEmojiInput.addEventListener('input', () => {
+            const enteredValue = playerEmojiInput.value;
+            if (!enteredValue.trim()) {
+                selectedPlayerEmoji = '';
+                playerEmojiInput.setCustomValidity('');
+                return;
+            }
+
+            const emoji = getFirstGrapheme(enteredValue);
+            if (!isEmoji(emoji)) {
+                selectedPlayerEmoji = '';
+                playerEmojiInput.setCustomValidity('Bitte wähle ein Emoji aus der Emoji-Tastatur.');
+                return;
+            }
+
+            selectedPlayerEmoji = emoji;
+            playerEmojiInput.value = emoji;
+            playerEmojiInput.setCustomValidity('');
+        });
 
         function makeQuestionId() {
             return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -845,6 +1032,23 @@
         function getDisplayedScore(score) {
             const numericScore = Number(score);
             return Number.isFinite(numericScore) ? Math.max(0, numericScore) : 0;
+        }
+
+        function updatePlayerQuestionProgress(questionIndex, isRevealed, questionCount, isFinished) {
+            const total = Math.max(0, Number(questionCount) || 0);
+            const completed = isFinished
+                ? total
+                : Math.min(total, Math.max(0, Number(questionIndex) + (isRevealed ? 1 : 0)));
+            const remaining = Math.max(0, total - completed);
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const progress = document.querySelector('#player-game-screen [role="progressbar"]');
+
+            document.getElementById('player-questions-remaining').textContent = String(remaining);
+            document.getElementById('player-questions-remaining-label').textContent =
+                remaining === 1 ? 'Frage übrig' : 'Fragen übrig';
+            document.getElementById('player-question-progress-fill').style.width = `${percentage}%`;
+            progress.setAttribute('aria-valuenow', String(percentage));
+            progress.setAttribute('aria-valuetext', `${remaining} ${remaining === 1 ? 'Frage' : 'Fragen'} übrig`);
         }
 
         function normalizeQuestion(question) {
@@ -873,11 +1077,15 @@
                 const step = Number(question.step);
                 const correct = Number(question.correct);
                 const tolerance = Number(question.tolerance);
-                if (![min, max, step, correct, tolerance].every(Number.isFinite) || min >= max || step <= 0 || correct < min || correct > max || tolerance < 0) return null;
-                Object.assign(normalized, { min, max, step, correct, tolerance });
+                const points = Number(question.points ?? 100);
+                if (![min, max, step, correct, tolerance, points].every(Number.isFinite) || !Number.isInteger(points) || min >= max || step <= 0 || correct < min || correct > max || tolerance < 0) return null;
+                Object.assign(normalized, { min, max, step, correct, tolerance, points });
             } else {
                 if (!Array.isArray(question.items) || question.items.length < 2 || question.items.some(item => typeof item !== 'string' || !item.trim())) return null;
                 normalized.items = question.items.map(item => item.trim());
+                const points = Number(question.points ?? 100);
+                if (!Number.isInteger(points)) return null;
+                normalized.points = points;
             }
             return normalized.question ? normalized : null;
         }
@@ -895,27 +1103,49 @@
             };
         }
 
-        async function persistQuestionBank(transformQuestions) {
-            let transformRejected = false;
+        function hasExpectedQuestionSet(questions) {
+            if (!Array.isArray(questions) || questions.length !== defaultCareerQuestions.length) return false;
+            return defaultCareerQuestions.every((expected, index) => {
+                const actual = questions[index];
+                if (!actual || actual.id !== expected.id) return false;
+                const actualContent = { ...actual };
+                const expectedContent = { ...expected };
+                delete actualContent.moderation;
+                delete expectedContent.moderation;
+                delete actualContent.points;
+                delete expectedContent.points;
+                return JSON.stringify(actualContent) === JSON.stringify(expectedContent);
+            });
+        }
+
+        async function persistQuestionEditorChanges(questionId, moderation, points) {
+            const expectedQuestion = defaultCareerQuestions.find(question => question.id === questionId);
+            if (!expectedQuestion || typeof moderation !== 'string' || moderation.length > 500) return false;
+            if (expectedQuestion.type === 'choice'
+                ? !Array.isArray(points) || points.length !== 4 || points.some(value => !Number.isInteger(value))
+                : !Number.isInteger(points)) return false;
+
+            let rejected = false;
             const result = await runTransaction(ref(db, 'questionBank'), currentBank => {
                 const bank = normalizeQuestionBank(currentBank);
-                if (!bank) return;
-                const questions = transformQuestions(bank.questions);
-                if (!Array.isArray(questions)) {
-                    transformRejected = true;
+                if (!bank || bank.questionBankVersion < QUESTION_BANK_VERSION || !hasExpectedQuestionSet(bank.questions)) {
+                    rejected = true;
                     return;
                 }
+                const questions = bank.questions.map(question => question.id === questionId
+                    ? { ...question, moderation, points }
+                    : question);
                 return {
                     updatedAt: Date.now(),
                     questionBankVersion: QUESTION_BANK_VERSION,
-                    questionCount: questions.length,
+                    questionCount: defaultCareerQuestions.length,
                     questions
                 };
             }, { applyLocally: false });
 
-            if (!result.committed || transformRejected) return false;
+            if (!result.committed || rejected) return false;
             const payload = normalizeQuestionBank(result.snapshot.val());
-            if (!payload) throw new Error('Der gespeicherte Fragenkatalog hat ein ungültiges Format.');
+            if (!payload || !hasExpectedQuestionSet(payload.questions)) throw new Error('Der gespeicherte Fragenkatalog hat ein ungültiges Format.');
             careerQuestions = payload.questions;
             return true;
         }
@@ -941,19 +1171,27 @@
                     }, { applyLocally: false });
                     bank = normalizeQuestionBank(result.snapshot.val());
                     if (!bank) throw new Error('Der gemeinsame Fragenkatalog konnte nicht initialisiert werden.');
-                } else if (bank.questionBankVersion < QUESTION_BANK_VERSION) {
+                } else if (bank.questionBankVersion < QUESTION_BANK_VERSION || !hasExpectedQuestionSet(bank.questions)) {
                     const migrated = await runTransaction(ref(db, 'questionBank'), currentBank => {
                         const current = normalizeQuestionBank(currentBank);
-                        if (!current || current.questionBankVersion >= QUESTION_BANK_VERSION) return;
+                        if (current && current.questionBankVersion >= QUESTION_BANK_VERSION && hasExpectedQuestionSet(current.questions)) return;
+                        const existingQuestions = new Map((current?.questions || []).map(question => [question.id, question]));
+                        const questions = defaultCareerQuestions.map(question => ({
+                            ...question,
+                            moderation: existingQuestions.get(question.id)?.moderation ?? question.moderation,
+                            points: question.type === 'choice'
+                                ? (Array.isArray(existingQuestions.get(question.id)?.points) ? existingQuestions.get(question.id).points : question.points)
+                                : (Number.isInteger(existingQuestions.get(question.id)?.points) ? existingQuestions.get(question.id).points : (question.points ?? 100))
+                        }));
                         return {
                             updatedAt: Date.now(),
                             questionBankVersion: QUESTION_BANK_VERSION,
-                            questionCount: defaultCareerQuestions.length,
-                            questions: defaultCareerQuestions
+                            questionCount: questions.length,
+                            questions
                         };
                     }, { applyLocally: false });
                     bank = normalizeQuestionBank(migrated.snapshot.val());
-                    if (!bank || bank.questionBankVersion < QUESTION_BANK_VERSION) {
+                    if (!bank || bank.questionBankVersion < QUESTION_BANK_VERSION || !hasExpectedQuestionSet(bank.questions)) {
                         throw new Error('Der gemeinsame Fragenkatalog konnte nicht auf die Fragen aus der HTML-Datei umgestellt werden.');
                     }
                 }
@@ -971,7 +1209,7 @@
             onValue(ref(db, 'questionBank'), snapshot => {
                 if (!snapshot.exists()) return;
                 const bank = normalizeQuestionBank(snapshot.val());
-                if (!bank || bank.questionBankVersion < QUESTION_BANK_VERSION) {
+                if (!bank || bank.questionBankVersion < QUESTION_BANK_VERSION || !hasExpectedQuestionSet(bank.questions)) {
                     console.error('Veralteter oder ungültiger gemeinsamer Fragenkatalog wurde ignoriert.');
                     return;
                 }
@@ -988,44 +1226,76 @@
             });
         });
 
-        function questionTypeLabel(type) {
-            return { choice: 'Multiple Choice', estimate: 'Schätzfrage', sort: 'Sortierfrage' }[type] || 'Multiple Choice';
-        }
-
         function renderQuestionEditor() {
             const list = document.getElementById('question-editor-list');
             list.replaceChildren();
+            if (!hasExpectedQuestionSet(careerQuestions)) {
+                document.getElementById('question-editor-status').innerText = 'Der Fragenkatalog ist ungültig. Es wurden keine Änderungen vorgenommen.';
+                return;
+            }
             careerQuestions.forEach((question, index) => {
                 const row = document.createElement('div');
-                row.className = 'flex items-center gap-2 p-3 bg-slate-950 border border-slate-800 rounded-xl';
-                const info = document.createElement('div');
-                info.className = 'min-w-0 flex-1';
+                row.className = 'space-y-2 p-3 bg-slate-950 border border-slate-800 rounded-xl';
                 const title = document.createElement('p');
-                title.className = 'truncate text-xs font-semibold text-slate-100';
+                title.className = 'text-xs font-semibold text-slate-100';
                 title.textContent = `${index + 1}. ${question.question}`;
-                const type = document.createElement('p');
-                type.className = 'text-[10px] text-slate-500';
-                type.textContent = questionTypeLabel(question.type);
-                info.append(title, type);
-                const editButton = document.createElement('button');
-                editButton.type = 'button';
-                editButton.className = 'px-2 py-1 text-xs text-indigo-300';
-                editButton.textContent = 'Bearbeiten';
-                editButton.addEventListener('click', () => editEditorQuestion(question.id));
-                const deleteButton = document.createElement('button');
-                deleteButton.type = 'button';
-                deleteButton.className = 'px-2 py-1 text-xs text-rose-400';
-                deleteButton.textContent = 'Löschen';
-                deleteButton.addEventListener('click', () => deleteEditorQuestion(question.id));
-                row.append(info, editButton, deleteButton);
+                row.appendChild(title);
+                if (question.type === 'choice') {
+                    const answers = document.createElement('div');
+                    answers.className = 'space-y-2';
+                    const answersTitle = document.createElement('p');
+                    answersTitle.className = 'text-[10px] font-semibold uppercase tracking-wider text-slate-400';
+                    answersTitle.textContent = 'Punkte je Antwort';
+                    answers.appendChild(answersTitle);
+                    question.options.forEach((option, optionIndex) => {
+                        const answerRow = document.createElement('label');
+                        answerRow.className = 'grid grid-cols-[minmax(0,1fr)_88px] items-center gap-2';
+                        const answerText = document.createElement('span');
+                        answerText.className = 'truncate text-[11px] text-slate-300';
+                        answerText.textContent = `${String.fromCharCode(65 + optionIndex)}. ${option || '(keine Antwort)'}`;
+                        const pointsInput = document.createElement('input');
+                        pointsInput.type = 'number';
+                        pointsInput.step = '1';
+                        pointsInput.value = String(question.points[optionIndex]);
+                        pointsInput.setAttribute('aria-label', `Punkte für Antwort ${String.fromCharCode(65 + optionIndex)} bei Frage ${index + 1}`);
+                        pointsInput.className = 'w-full p-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100';
+                        answerRow.append(answerText, pointsInput);
+                        answers.appendChild(answerRow);
+                    });
+                    row.appendChild(answers);
+                } else {
+                    const pointsLabel = document.createElement('label');
+                    pointsLabel.className = 'grid grid-cols-[minmax(0,1fr)_88px] items-center gap-2 text-[10px] font-semibold text-slate-400';
+                    pointsLabel.textContent = question.type === 'estimate' ? 'Punkte für richtige Schätzung' : 'Punkte für richtige Reihenfolge';
+                    const pointsInput = document.createElement('input');
+                    pointsInput.type = 'number';
+                    pointsInput.step = '1';
+                    pointsInput.value = String(question.points);
+                    pointsInput.setAttribute('aria-label', `Punkte für Frage ${index + 1}`);
+                    pointsInput.className = 'w-full p-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100';
+                    pointsLabel.appendChild(pointsInput);
+                    row.appendChild(pointsLabel);
+                }
+
+                const hintLabel = document.createElement('label');
+                hintLabel.className = 'block text-[10px] font-semibold text-slate-400';
+                hintLabel.textContent = 'Hinweis';
+                const hintInput = document.createElement('textarea');
+                hintInput.maxLength = 500;
+                hintInput.rows = 3;
+                hintInput.value = question.moderation || '';
+                hintInput.setAttribute('aria-label', `Hinweis zu Frage ${index + 1}`);
+                hintInput.className = 'mt-1 w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100';
+                hintLabel.appendChild(hintInput);
+                const saveButton = document.createElement('button');
+                saveButton.type = 'button';
+                saveButton.className = 'w-full bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs py-2.5 rounded-xl text-white';
+                saveButton.textContent = 'Änderungen speichern';
+                const pointsInputs = [...row.querySelectorAll('input[type="number"]')];
+                saveButton.addEventListener('click', () => saveQuestionEditorChanges(question.id, hintInput.value, pointsInputs, saveButton));
+                row.append(hintLabel, saveButton);
                 list.appendChild(row);
             });
-            if (!careerQuestions.length) {
-                const empty = document.createElement('p');
-                empty.className = 'py-4 text-center text-xs text-slate-500';
-                empty.textContent = 'Noch keine Fragen. Füge die erste Frage hinzu.';
-                list.appendChild(empty);
-            }
         }
 
         window.openQuestionEditor = async function() {
@@ -1038,7 +1308,6 @@
             document.getElementById('join-screen').classList.add('hidden');
             document.getElementById('question-editor-screen').classList.remove('hidden');
             renderQuestionEditor();
-            newEditorQuestion();
         };
 
         window.closeQuestionEditor = function() {
@@ -1046,169 +1315,42 @@
             document.getElementById('home-screen').classList.remove('hidden');
         };
 
-        window.newEditorQuestion = function() {
-            editingQuestionId = null;
-            document.getElementById('question-editor-form').reset();
-            document.getElementById('question-editor-form-title').innerText = 'Neue Frage';
-            document.getElementById('editor-sort-items').replaceChildren();
-            addEditorSortItem();
-            addEditorSortItem();
-            updateEditorQuestionType();
-        };
-
-        window.updateEditorQuestionType = function() {
-            const type = document.getElementById('editor-question-type').value;
-            document.getElementById('editor-choice-fields').classList.toggle('hidden', type !== 'choice');
-            document.getElementById('editor-estimate-fields').classList.toggle('hidden', type !== 'estimate');
-            document.getElementById('editor-sort-fields').classList.toggle('hidden', type !== 'sort');
-            document.querySelectorAll('#editor-choice-fields input:not([type]), #editor-choice-fields input[type="text"]').forEach(input => {
-                input.disabled = type !== 'choice';
-                input.required = false;
-            });
-            document.querySelectorAll('#editor-sort-items input').forEach(input => {
-                input.disabled = type !== 'sort';
-                input.required = type === 'sort';
-            });
-        };
-
-        window.addEditorSortItem = function(value = '') {
-            const row = document.createElement('div');
-            row.className = 'flex gap-2';
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.required = true;
-            input.maxLength = 120;
-            input.value = value;
-            input.placeholder = 'Sortierelement';
-            input.className = 'min-w-0 flex-1 p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs';
-            const removeButton = document.createElement('button');
-            removeButton.type = 'button';
-            removeButton.className = 'px-2 text-rose-400';
-            removeButton.textContent = 'Entfernen';
-            removeButton.addEventListener('click', () => row.remove());
-            row.append(input, removeButton);
-            document.getElementById('editor-sort-items').appendChild(row);
-        };
-
-        window.editEditorQuestion = function(questionId) {
-            const question = careerQuestions.find(item => item.id === questionId);
-            if (!question) return;
-            editingQuestionId = question.id;
-            document.getElementById('question-editor-form-title').innerText = 'Frage bearbeiten';
-            document.getElementById('editor-question-text').value = question.question;
-            document.getElementById('editor-question-type').value = question.type;
-            document.getElementById('editor-question-moderation').value = question.moderation || '';
-            for (let index = 0; index < 4; index += 1) {
-                document.getElementById(`editor-option-${index}`).value = question.options?.[index] || '';
-                document.getElementById(`editor-points-${index}`).value = question.points?.[index] ?? 100;
-            }
-            const correctAnswers = question.type === 'choice'
-                ? (Array.isArray(question.correct) ? question.correct : [question.correct])
-                : [];
-            document.querySelectorAll('input[name="editor-correct"]').forEach(input => {
-                input.checked = correctAnswers.map(Number).includes(Number(input.value));
-            });
-            document.getElementById('editor-estimate-min').value = question.min ?? 0;
-            document.getElementById('editor-estimate-max').value = question.max ?? 100;
-            document.getElementById('editor-estimate-step').value = question.step ?? 1;
-            document.getElementById('editor-estimate-correct').value = question.type === 'estimate' ? question.correct : 50;
-            document.getElementById('editor-estimate-tolerance').value = question.tolerance ?? 5;
-            document.getElementById('editor-sort-items').replaceChildren();
-            (question.items || []).forEach(item => addEditorSortItem(item));
-            updateEditorQuestionType();
-            document.getElementById('question-editor-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
-
-        window.deleteEditorQuestion = async function(questionId) {
-            try {
-                const saved = await persistQuestionBank(questions => {
-                    if (!questions.some(question => question.id === questionId)) return null;
-                    return questions.filter(question => question.id !== questionId);
-                });
-                if (!saved) {
-                    document.getElementById('question-editor-status').innerText = 'Die Frage wurde nicht gefunden oder konnte nicht gespeichert werden.';
-                    return;
-                }
-                editingQuestionId = editingQuestionId === questionId ? null : editingQuestionId;
-                renderQuestionEditor();
-                document.getElementById('question-editor-status').innerText = 'Frage auf allen Geräten gelöscht.';
-            } catch (error) {
-                console.error('Frage konnte nicht gemeinsam gelöscht werden:', error);
-                document.getElementById('question-editor-status').innerText = 'Löschen fehlgeschlagen. Die Frage wurde nicht verändert; bitte Internetverbindung und Datenbankzugriff prüfen.';
-            }
-        };
-
-        window.saveEditorQuestion = async function(event) {
-            event.preventDefault();
-            const type = document.getElementById('editor-question-type').value;
-            const question = {
-                id: editingQuestionId || makeQuestionId(),
-                type,
-                question: document.getElementById('editor-question-text').value.trim(),
-                moderation: document.getElementById('editor-question-moderation').value.trim()
-            };
-
-            if (type === 'choice') {
-                question.options = [0, 1, 2, 3].map(index => document.getElementById(`editor-option-${index}`).value.trim());
-                question.correct = [...document.querySelectorAll('input[name="editor-correct"]:checked')].map(input => Number(input.value));
-                question.points = [0, 1, 2, 3].map(index => Number(document.getElementById(`editor-points-${index}`).value));
-                if (!question.options.some(Boolean)) {
-                    document.getElementById('question-editor-status').innerText = 'Bitte mindestens eine Antwort eintragen.';
-                    return;
-                }
-                if (question.points.some(points => !Number.isInteger(points))) {
-                    document.getElementById('question-editor-status').innerText = 'Bitte für jede Antwort eine ganze Punktzahl eintragen.';
-                    return;
-                }
-                if (!question.correct.length || question.correct.some(index => !question.options[index])) {
-                    document.getElementById('question-editor-status').innerText = 'Bitte mindestens eine ausgefüllte Antwort als richtig markieren.';
-                    return;
-                }
-            } else if (type === 'estimate') {
-                question.min = Number(document.getElementById('editor-estimate-min').value);
-                question.max = Number(document.getElementById('editor-estimate-max').value);
-                question.step = Number(document.getElementById('editor-estimate-step').value);
-                question.correct = Number(document.getElementById('editor-estimate-correct').value);
-                question.tolerance = Number(document.getElementById('editor-estimate-tolerance').value);
-                if (![question.min, question.max, question.step, question.correct, question.tolerance].every(Number.isFinite) || question.min >= question.max || question.step <= 0 || question.correct < question.min || question.correct > question.max || question.tolerance < 0) {
-                    document.getElementById('question-editor-status').innerText = 'Bitte gültige Grenzen, Schrittweite, Lösung und Toleranz angeben.';
-                    return;
-                }
-            } else {
-                question.items = [...document.querySelectorAll('#editor-sort-items input')].map(input => input.value.trim()).filter(Boolean);
-                if (question.items.length < 2) {
-                    document.getElementById('question-editor-status').innerText = 'Eine Sortierfrage braucht mindestens zwei Elemente.';
-                    return;
-                }
-            }
-
-            const normalized = normalizeQuestion(question);
-            if (!normalized) {
-                document.getElementById('question-editor-status').innerText = 'Die Frage ist unvollständig oder ungültig.';
+        async function saveQuestionEditorChanges(questionId, moderation, pointsInputs, button) {
+            const status = document.getElementById('question-editor-status');
+            if (typeof moderation !== 'string' || moderation.length > 500 || !defaultCareerQuestions.some(question => question.id === questionId)) {
+                status.innerText = 'Hinweis ungueltig. Es wurden keine Aenderungen gespeichert.';
                 return;
             }
+
+            const expectedQuestion = defaultCareerQuestions.find(question => question.id === questionId);
+            const points = expectedQuestion.type === 'choice'
+                ? pointsInputs.map(input => input.valueAsNumber)
+                : pointsInputs[0]?.valueAsNumber;
+            if (expectedQuestion.type === 'choice'
+                ? points.length !== 4 || points.some(value => !Number.isInteger(value))
+                : !Number.isInteger(points)) {
+                status.innerText = 'Bitte gueltige ganze Punktzahlen fuer die Frage eintragen.';
+                return;
+            }
+
+            button.disabled = true;
+            status.innerText = 'Aenderungen werden auf allen Geraeten gespeichert...';
             try {
-                const saved = await persistQuestionBank(questions => {
-                    if (editingQuestionId) {
-                        const existingIndex = questions.findIndex(item => item.id === editingQuestionId);
-                        if (existingIndex < 0) return null;
-                        questions[existingIndex] = normalized;
-                        return questions;
-                    }
-                    return [...questions, normalized];
-                });
+                await questionBankReady;
+                const saved = await persistQuestionEditorChanges(questionId, moderation, points);
                 if (!saved) {
-                    document.getElementById('question-editor-status').innerText = 'Die Frage wurde nicht gefunden oder konnte nicht gespeichert werden.';
+                    status.innerText = 'Speichern fehlgeschlagen: Der gemeinsame Fragenbestand ist nicht erreichbar oder stimmt nicht ueberein.';
                     return;
                 }
                 renderQuestionEditor();
-                newEditorQuestion();
-                document.getElementById('question-editor-status').innerText = 'Frage auf allen Geräten gespeichert.';
+                status.innerText = 'Hinweis und Punkte dauerhaft auf allen Geraeten gespeichert.';
             } catch (error) {
-                console.error('Frage konnte nicht gemeinsam gespeichert werden:', error);
-                document.getElementById('question-editor-status').innerText = 'Speichern fehlgeschlagen. Die Frage wurde nicht verändert; bitte Internetverbindung und Datenbankzugriff prüfen.';
+                console.error('Fragenhinweis oder Antwortpunkte konnten nicht gemeinsam gespeichert werden:', error);
+                status.innerText = 'Speichern fehlgeschlagen. Bitte Internetverbindung pruefen; Aenderungen wurden nicht als gespeichert markiert.';
+            } finally {
+                button.disabled = false;
             }
-        };
+        }
 
         let currentRoom = null;
         let currentPlayerId = null;
@@ -1218,6 +1360,7 @@
         let hasAnsweredCurrentQuestion = false;
         let selectedChoiceAnswers = new Set();
         let playerChoiceQuestionKey = '';
+        let playerEstimateQuestionKey = '';
 
         function updateBeamerJoinInfoControl(visible) {
             beamerJoinInfoVisible = visible;
@@ -1466,10 +1609,18 @@
                         roomData.joinInfoVisible !== true || qIdx >= 0
                     );
 
-                    if (qIdx === -1) {
+                    if (roomData.finished === true) {
+                        document.getElementById('beamer-waiting-view').classList.add('hidden');
+                        document.getElementById('beamer-question-view').classList.add('hidden');
+                        document.getElementById('beamer-leaderboard-view').classList.add('hidden');
+                        document.getElementById('beamer-final-leaderboard-view').classList.remove('hidden');
+                        renderBeamerFinalLeaderboard(players, Number(roomData.completedQuestions) || careerQuestions.length);
+                    } else if (qIdx === -1) {
                         document.getElementById('beamer-waiting-view').classList.remove('hidden');
                         document.getElementById('beamer-question-view').classList.add('hidden');
                         document.getElementById('beamer-leaderboard-view').classList.add('hidden');
+                        document.getElementById('beamer-final-leaderboard-view').classList.add('hidden');
+                        beamerFinalRankingSignature = '';
 
                         const listDiv = document.getElementById('beamer-players-list');
                         listDiv.innerHTML = '';
@@ -1479,8 +1630,8 @@
                         } else {
                             playerKeys.forEach(p => {
                                 const badge = document.createElement('div');
-                                badge.className = 'px-4 py-2 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold text-indigo-300 shadow-lg animate-pulse';
-                                badge.innerText = p.name;
+                                badge.className = 'px-4 py-2 bg-slate-900 border border-slate-800 rounded-2xl text-sm font-bold text-indigo-200 shadow-lg animate-pulse';
+                                badge.textContent = `${p.profileEmoji || '👤'} ${p.name || 'Spieler'}`;
                                 listDiv.appendChild(badge);
                             });
                         }
@@ -1488,6 +1639,7 @@
                         document.getElementById('beamer-waiting-view').classList.add('hidden');
                         document.getElementById('beamer-question-view').classList.add('hidden');
                         document.getElementById('beamer-leaderboard-view').classList.remove('hidden');
+                        document.getElementById('beamer-final-leaderboard-view').classList.add('hidden');
 
                         renderBeamerCorrectAnswer(careerQuestions[qIdx]);
                         renderBeamerAnswerStats(careerQuestions[qIdx], players);
@@ -1497,13 +1649,20 @@
 
                         sorted.forEach((p, index) => {
                             const d = document.createElement('div');
-                            d.className = 'flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 text-sm font-bold';
-                            d.innerHTML = `<span>#${index + 1} ${p.name}</span><span class="text-indigo-400 font-mono">${getDisplayedScore(p.score)} Pkt</span>`;
+                            d.className = 'flex justify-between items-center gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800 text-base font-bold';
+                            const identity = document.createElement('span');
+                            identity.className = 'min-w-0 break-words';
+                            identity.textContent = `#${index + 1} ${p.profileEmoji || '👤'} ${p.name || 'Spieler'}`;
+                            const score = document.createElement('span');
+                            score.className = 'shrink-0 text-indigo-300 font-mono';
+                            score.textContent = `${getDisplayedScore(p.score)} Pkt`;
+                            d.append(identity, score);
                             topList.appendChild(d);
                         });
                     } else if (qIdx >= 0) {
                         document.getElementById('beamer-waiting-view').classList.add('hidden');
                         document.getElementById('beamer-leaderboard-view').classList.add('hidden');
+                        document.getElementById('beamer-final-leaderboard-view').classList.add('hidden');
                         document.getElementById('beamer-question-view').classList.remove('hidden');
 
                         const qData = careerQuestions[qIdx];
@@ -1515,24 +1674,28 @@
                         liveList.innerHTML = '';
                         Object.values(players).forEach(p => {
                             const pill = document.createElement('div');
+                            const identity = document.createElement('span');
+                            identity.textContent = `${p.profileEmoji || '👤'} ${p.name || 'Spieler'}`;
+                            const statusIcon = document.createElement('span');
                             if (p.hasAnswered) {
-                                pill.className = 'px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold flex items-center gap-1.5';
-                                pill.innerHTML = `<span>${p.name}</span> <span>✅</span>`;
+                                pill.className = 'px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-xl text-sm font-bold flex items-center gap-2';
+                                statusIcon.textContent = '✅';
                             } else {
-                                pill.className = 'px-3 py-1 bg-slate-900 border border-slate-800 text-slate-400 rounded-xl text-xs font-semibold flex items-center gap-1.5';
-                                pill.innerHTML = `<span>${p.name}</span> <span class="animate-pulse">⏳</span>`;
+                                pill.className = 'px-3 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-sm font-semibold flex items-center gap-2';
+                                statusIcon.className = 'animate-pulse';
+                                statusIcon.textContent = '⏳';
                             }
+                            pill.append(identity, statusIcon);
                             liveList.appendChild(pill);
                         });
 
                         const beamerGrid = document.getElementById('beamer-options-grid');
                         beamerGrid.innerHTML = '';
-                        const colors = ['bg-rose-500/10 border-rose-500/20 text-rose-400', 'bg-blue-500/10 border-blue-500/20 text-blue-400', 'bg-amber-500/10 border-amber-500/20 text-amber-400', 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'];
                         const questionType = qData.type || 'choice';
                         if (questionType === 'estimate') {
                             beamerGrid.className = 'grid grid-cols-1 gap-4 text-center max-w-2xl mx-auto';
                             const range = document.createElement('div');
-                            range.className = 'p-5 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-lg font-bold text-indigo-200';
+                            range.className = 'beamer-answer-option p-5 rounded-2xl border text-lg font-bold';
                             range.textContent = `Schätzung: ${qData.min} bis ${qData.max}`;
                             beamerGrid.appendChild(range);
                         } else if (questionType === 'sort') {
@@ -1540,7 +1703,7 @@
                             const sortItems = getBeamerSortItems(qIdx, qData.items);
                             sortItems.forEach((item, index) => {
                                 const row = document.createElement('div');
-                                row.className = `p-4 rounded-2xl border ${colors[index % colors.length]} text-xs font-semibold`;
+                                row.className = 'beamer-answer-option p-4 rounded-2xl border text-base font-semibold';
                                 row.textContent = item;
                                 beamerGrid.appendChild(row);
                             });
@@ -1548,9 +1711,9 @@
                             beamerGrid.className = 'grid grid-cols-2 gap-4 text-left max-w-2xl mx-auto';
                             qData.options.forEach((option, index) => {
                                 const optionRow = document.createElement('div');
-                                optionRow.className = `p-4 rounded-2xl border ${colors[index % colors.length]} text-xs font-semibold flex items-center gap-3`;
+                                optionRow.className = 'beamer-answer-option p-5 rounded-2xl border text-base md:text-lg font-bold flex items-center gap-3';
                                 const letter = document.createElement('span');
-                                letter.className = 'w-6 h-6 rounded-lg bg-black/20 flex items-center justify-center font-bold';
+                                letter.className = 'w-9 h-9 rounded-xl flex items-center justify-center text-base font-extrabold shrink-0';
                                 letter.textContent = String.fromCharCode(65 + index);
                                 const label = document.createElement('span');
                                 label.textContent = option;
@@ -1668,6 +1831,74 @@
             });
         }
 
+        let beamerFinalRankingSignature = '';
+
+        function renderBeamerFinalLeaderboard(players, questionCount) {
+            const entries = Object.values(players || {}).sort((left, right) => {
+                const scoreDifference = getDisplayedScore(right.score) - getDisplayedScore(left.score);
+                return scoreDifference || String(left.name || '').localeCompare(String(right.name || ''), 'de');
+            });
+            const signature = JSON.stringify(entries.map(player => [player.name || '', player.profileEmoji || '', getDisplayedScore(player.score)]));
+            if (signature === beamerFinalRankingSignature) return;
+            beamerFinalRankingSignature = signature;
+
+            const podium = document.getElementById('beamer-final-podium');
+            const ranking = document.getElementById('beamer-final-ranking');
+            podium.replaceChildren();
+            ranking.replaceChildren();
+            document.getElementById('beamer-final-subtitle').textContent =
+                `${questionCount} ${questionCount === 1 ? 'Frage' : 'Fragen'} gespielt • ${entries.length} Spieler`;
+
+            if (!entries.length) {
+                const empty = document.createElement('p');
+                empty.className = 'text-slate-400 text-sm py-8';
+                empty.textContent = 'Es sind keine Teilnehmer in der Rangliste.';
+                podium.appendChild(empty);
+                return;
+            }
+
+            const placements = [
+                { index: 1, medal: '🥈', label: '2. Platz', style: 'border-slate-400/40 bg-slate-800/80 sm:order-1 sm:mb-0' },
+                { index: 0, medal: '🥇', label: '1. Platz', style: 'border-amber-300/60 bg-amber-500/10 sm:order-2 sm:-translate-y-4' },
+                { index: 2, medal: '🥉', label: '3. Platz', style: 'border-amber-700/50 bg-amber-900/10 sm:order-3 sm:mb-0' }
+            ];
+            placements.forEach(({ index, medal, label, style }) => {
+                const player = entries[index];
+                if (!player) return;
+                const card = document.createElement('div');
+                card.className = `leaderboard-entry ${index === 0 ? 'leaderboard-champion' : ''} rounded-3xl border p-5 md:p-7 text-center shadow-xl ${style}`;
+                card.style.setProperty('--leaderboard-delay', `${index * 220}ms`);
+                const medalIcon = document.createElement('div');
+                medalIcon.className = 'text-5xl md:text-6xl mb-2';
+                medalIcon.textContent = medal;
+                const place = document.createElement('p');
+                place.className = 'text-[10px] uppercase tracking-[0.2em] font-extrabold text-slate-400';
+                place.textContent = label;
+                const name = document.createElement('p');
+                name.className = 'mt-2 text-base md:text-xl font-extrabold text-slate-100 break-words';
+                name.textContent = `${player.profileEmoji || '👤'} ${player.name || 'Spieler'}`;
+                const score = document.createElement('p');
+                score.className = 'mt-2 text-2xl md:text-3xl font-black font-mono text-amber-300';
+                score.textContent = `${getDisplayedScore(player.score)} Pkt`;
+                card.append(medalIcon, place, name, score);
+                podium.appendChild(card);
+            });
+
+            entries.slice(3).forEach((player, index) => {
+                const row = document.createElement('div');
+                row.className = 'leaderboard-entry flex items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3 text-left';
+                row.style.setProperty('--leaderboard-delay', `${660 + index * 100}ms`);
+                const placeAndName = document.createElement('span');
+                placeAndName.className = 'min-w-0 text-sm font-bold text-slate-200';
+                placeAndName.textContent = `${index + 4}. ${player.profileEmoji || '👤'} ${player.name || 'Spieler'}`;
+                const score = document.createElement('span');
+                score.className = 'shrink-0 font-mono text-sm font-extrabold text-indigo-300';
+                score.textContent = `${getDisplayedScore(player.score)} Pkt`;
+                row.append(placeAndName, score);
+                ranking.appendChild(row);
+            });
+        }
+
         window.createRoom = async function() {
             const startButton = document.getElementById('secret-host-btn');
             if (startButton.disabled) return;
@@ -1685,6 +1916,7 @@
                     status: 'waiting',
                     currentQuestion: -1,
                     isRevealed: false,
+                    finished: false,
                     timeLeft: 0,
                     joinInfoVisible: true,
                     questions: careerQuestions
@@ -1708,17 +1940,36 @@
                     const sorted = Object.entries(players);
                     sorted.forEach(([pKey, player]) => {
                         const div = document.createElement('div');
-                        div.className = 'flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs';
-                        div.innerHTML = `
-                            <div>
-                                <span class="font-bold text-slate-200">${player.name}</span> 
-                                <span class="text-slate-500 ml-2">(${player.hasAnswered ? '✅' : '⏳'})</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="font-mono font-bold text-indigo-400">${getDisplayedScore(player.score)} Pkt</span>
-                                <button onclick="kickPlayer('${pKey}')" class="text-rose-400 hover:text-rose-300 font-bold px-1.5 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-[10px]">🔴 Kick</button>
-                            </div>
-                        `;
+                        div.className = 'flex justify-between items-center gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800 text-sm';
+                        const identity = document.createElement('div');
+                        identity.className = 'min-w-0 flex items-center gap-2';
+                        const avatar = document.createElement('span');
+                        avatar.className = 'text-xl shrink-0';
+                        avatar.textContent = player.profileEmoji || '👤';
+                        avatar.setAttribute('aria-hidden', 'true');
+                        const nameAndStatus = document.createElement('span');
+                        nameAndStatus.className = 'min-w-0';
+                        const name = document.createElement('span');
+                        name.className = 'block truncate font-bold text-slate-100';
+                        name.textContent = player.name || 'Spieler';
+                        const status = document.createElement('span');
+                        status.className = 'block text-xs text-slate-400';
+                        status.textContent = player.hasAnswered ? '✅ Antwort abgegeben' : '⏳ Antwort offen';
+                        nameAndStatus.append(name, status);
+                        identity.append(avatar, nameAndStatus);
+                        const actions = document.createElement('div');
+                        actions.className = 'flex shrink-0 items-center gap-2';
+                        const score = document.createElement('span');
+                        score.className = 'font-mono font-bold text-indigo-300';
+                        score.textContent = `${getDisplayedScore(player.score)} Pkt`;
+                        const kickButton = document.createElement('button');
+                        kickButton.type = 'button';
+                        kickButton.className = 'min-h-10 rounded-lg border border-rose-500/20 bg-rose-500/10 px-2 text-xs font-bold text-rose-300 hover:bg-rose-500/20';
+                        kickButton.textContent = 'Kick';
+                        kickButton.setAttribute('aria-label', `${player.name || 'Spieler'} aus dem Raum entfernen`);
+                        kickButton.addEventListener('click', () => window.kickPlayer(pKey));
+                        actions.append(score, kickButton);
+                        div.append(identity, actions);
                         leaderboard.appendChild(div);
                     });
                 });
@@ -1749,43 +2000,69 @@
 
         let isRevealingInProgress = false;
 
-        window.revealAnswers = function() {
+        window.revealAnswers = async function() {
             if (currentQuestionIndex < 0 || isRevealingInProgress) return;
-
-            get(ref(db, `rooms/${currentRoom}/isRevealed`)).then((revSnap) => {
-                if (revSnap.val() === true) return;
-
-                isRevealingInProgress = true;
+            isRevealingInProgress = true;
+            try {
+                const revealedSnapshot = await get(ref(db, `rooms/${currentRoom}/isRevealed`));
+                if (revealedSnapshot.val() === true) return;
                 if (serverTimer) clearInterval(serverTimer);
 
-                get(ref(db, `rooms/${currentRoom}/players`)).then((snapshot) => {
-                    const players = snapshot.val();
-                    if (players) {
-                        Object.keys(players).forEach(pId => {
-                            const p = players[pId];
-                            if (p.selectedAnswer !== undefined && !p.scoreAwarded) {
-                                const awardedPoints = getAnswerPoints(careerQuestions[currentQuestionIndex], p.selectedAnswer);
-                                const newScore = (p.score || 0) + awardedPoints;
-                                update(ref(db, `rooms/${currentRoom}/players/${pId}`), {
-                                    score: newScore,
-                                    scoreAwarded: true,
-                                    lastAwardedPoints: awardedPoints
-                                });
-                            }
+                const snapshot = await get(ref(db, `rooms/${currentRoom}/players`));
+                const players = snapshot.val() || {};
+                const scoreUpdates = Object.entries(players)
+                    .filter(([, player]) => player.selectedAnswer !== undefined && !player.scoreAwarded)
+                    .map(([playerId, player]) => {
+                        const awardedPoints = getAnswerPoints(careerQuestions[currentQuestionIndex], player.selectedAnswer);
+                        return update(ref(db, `rooms/${currentRoom}/players/${playerId}`), {
+                            score: (Number(player.score) || 0) + awardedPoints,
+                            scoreAwarded: true,
+                            lastAwardedPoints: awardedPoints
                         });
-                    }
-
-                    update(ref(db, `rooms/${currentRoom}`), { isRevealed: true, timeLeft: 0 });
-                    isRevealingInProgress = false;
-                });
-            });
+                    });
+                await Promise.all(scoreUpdates);
+                await update(ref(db, `rooms/${currentRoom}`), { isRevealed: true, timeLeft: 0 });
+                if (currentQuestionIndex === careerQuestions.length - 1) {
+                    document.getElementById('btn-next-q').innerText = 'Endergebnis auf Tafel 🏆';
+                }
+            } catch (error) {
+                console.error('Antworten konnten nicht aufgelöst werden:', error);
+                window.showAppToast('Antworten konnten nicht aufgelöst werden. Bitte Verbindung prüfen.');
+            } finally {
+                isRevealingInProgress = false;
+            }
         };
 
         let serverTimer = null;
 
-        window.nextQuestion = function() {
+        window.nextQuestion = async function() {
+            if (currentQuestionIndex >= careerQuestions.length - 1) {
+                try {
+                    const roomSnapshot = await get(ref(db, `rooms/${currentRoom}`));
+                    const room = roomSnapshot.val();
+                    if (!room || room.isRevealed !== true) {
+                        window.showAppToast('Löse zuerst die letzte Frage auf, bevor das Endergebnis erscheint.');
+                        return;
+                    }
+                    if (serverTimer) clearInterval(serverTimer);
+                    await update(ref(db, `rooms/${currentRoom}`), {
+                        status: 'finished',
+                        finished: true,
+                        completedQuestions: careerQuestions.length,
+                        timeLeft: 0,
+                        joinInfoVisible: false
+                    });
+                    document.getElementById('host-game-status').innerText = 'Spiel beendet';
+                    document.getElementById('btn-next-q').disabled = true;
+                    document.getElementById('btn-next-q').innerText = 'Endergebnis angezeigt ✓';
+                } catch (error) {
+                    console.error('Endergebnis konnte nicht angezeigt werden:', error);
+                    window.showAppToast('Das Endergebnis konnte nicht angezeigt werden. Bitte Verbindung prüfen.');
+                }
+                return;
+            }
+
             currentQuestionIndex++;
-            if (currentQuestionIndex >= careerQuestions.length) return alert('Quiz beendet!');
             setBeamerJoinInfoAvailable(false);
 
             const qData = careerQuestions[currentQuestionIndex];
@@ -1819,6 +2096,7 @@
             update(ref(db, `rooms/${currentRoom}`), { 
                 currentQuestion: currentQuestionIndex,
                 isRevealed: false,
+                finished: false,
                 timeLeft: selectedDuration,
                 joinInfoVisible: false
             });
@@ -1860,6 +2138,13 @@
         window.joinRoom = function() {
             const name = document.getElementById('player-name').value.trim();
             const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+            if (!selectedPlayerEmoji) {
+                window.showAppToast(playerEmojiInput.value.trim()
+                    ? 'Bitte wähle ein Emoji aus der Emoji-Tastatur.'
+                    : 'Bitte tippe auf den Kreis und wähle ein Profil-Emoji aus.');
+                playerEmojiInput.focus();
+                return;
+            }
             if (!name || code.length !== 4) {
                 window.showAppToast(!name ? 'Bitte gib deinen Namen ein!' : 'Bitte gib einen gültigen 4-stelligen Raumcode ein!');
                 return;
@@ -1872,10 +2157,11 @@
                 currentRoom = code;
                 currentPlayerId = 'p_' + Math.random().toString(36).substring(2, 9);
 
-                set(ref(db, `rooms/${code}/players/${currentPlayerId}`), { name: name, score: 0, hasAnswered: false, selectedAnswer: null, scoreAwarded: false }).then(() => {
+                set(ref(db, `rooms/${code}/players/${currentPlayerId}`), { name: name, profileEmoji: selectedPlayerEmoji, score: 0, hasAnswered: false, selectedAnswer: null, scoreAwarded: false }).then(() => {
                     document.getElementById('join-screen').classList.add('hidden');
                     document.getElementById('player-game-screen').classList.remove('hidden');
                     document.getElementById('player-display-name').innerText = name;
+                    document.getElementById('player-profile-emoji').textContent = selectedPlayerEmoji;
 
                     onValue(ref(db, `rooms/${code}/players/${currentPlayerId}`), (pSnap) => {
                         if (!pSnap.exists()) {
@@ -1892,6 +2178,7 @@
                         const qIdx = roomData.currentQuestion;
                         const isRevealed = roomData.isRevealed;
                         const timeLeft = roomData.timeLeft || 0;
+                        updatePlayerQuestionProgress(qIdx, isRevealed, careerQuestions.length, roomData.finished === true);
 
                         if (qIdx !== undefined && qIdx >= 0) {
                             setupPlayerState(qIdx, isRevealed, timeLeft);
@@ -1981,10 +2268,14 @@
                         submitChoiceAnswer.disabled = selectedChoiceAnswers.size === 0;
                     } else if (type === 'estimate') {
                         const slider = document.getElementById('estimate-answer-input');
-                        slider.min = qData.min;
-                        slider.max = qData.max;
-                        slider.step = qData.step;
-                        slider.value = String((qData.min + qData.max) / 2);
+                        const estimateQuestionKey = qData.id || `${qIdx}:${qData.question}`;
+                        if (playerEstimateQuestionKey !== estimateQuestionKey) {
+                            playerEstimateQuestionKey = estimateQuestionKey;
+                            slider.min = qData.min;
+                            slider.max = qData.max;
+                            slider.step = qData.step;
+                            slider.value = String((qData.min + qData.max) / 2);
+                        }
                         document.getElementById('estimate-min-label').innerText = String(qData.min);
                         document.getElementById('estimate-max-label').innerText = String(qData.max);
                         window.updateEstimateValue();
@@ -2017,7 +2308,10 @@
         }
 
         function getQuestionMaximumPoints(question) {
-            if (!question || (question.type || 'choice') !== 'choice') return 100;
+            if (!question) return 0;
+            if ((question.type || 'choice') !== 'choice') {
+                return Number.isInteger(question.points) ? question.points : 100;
+            }
             const correctAnswers = Array.isArray(question.correct) ? question.correct : [question.correct];
             const points = Array.isArray(question.points) ? question.points : [100, 100, 100, 100];
             return [...new Set(correctAnswers.map(Number).filter(index => Number.isInteger(index) && index >= 0 && index < 4))]
@@ -2027,7 +2321,10 @@
         function getAnswerPoints(question, answer) {
             if (!question) return 0;
             const type = question.type || 'choice';
-            if (type !== 'choice') return isCorrectAnswer(question, answer) ? 100 : 0;
+            if (type !== 'choice') {
+                const points = Number.isInteger(question.points) ? question.points : 100;
+                return isCorrectAnswer(question, answer) ? points : 0;
+            }
 
             const correctAnswers = new Set((Array.isArray(question.correct) ? question.correct : [question.correct]).map(Number).filter(index => Number.isInteger(index) && index >= 0 && index < 4));
             const selectedAnswers = new Set((Array.isArray(answer) ? answer : [answer]).map(Number).filter(index => Number.isInteger(index) && index >= 0 && index < 4));
